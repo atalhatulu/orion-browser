@@ -4,6 +4,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const path = require('path');
 const url = require('url');
+const fs = require('fs');
 
 // Whitelist of channels that are allowed to be used from the renderer
 const allowedChannels = [
@@ -12,7 +13,15 @@ const allowedChannels = [
   'window-close',
   'window-state',
   'update-theme',
-  // Add any other channels you need here
+  'tracker-blocked',
+  'download-started',
+  'download-progress',
+  'download-done',
+  'new-tab-url',
+  'show-context-menu',
+  'toggle-adblock',
+  'toggle-fullscreen',
+  'set-fullscreen',
 ];
 
 // Function to check if a channel is allowed
@@ -63,5 +72,13 @@ contextBridge.exposeInMainWorld('utils', {
       slashes: true,
       pathname: path.join(__dirname, relativePath)
     });
+  },
+  // Homepage HTML'i dosyadan oku (file:// sorunlarını bypass için)
+  getHomepageHTML: () => {
+    try {
+      return fs.readFileSync(path.join(__dirname, 'homepage.html'), 'utf-8');
+    } catch(e) {
+      return '<html><body style="background:#0d0d0d;color:white;display:flex;align-items:center;justify-content:center;font-family:sans-serif;"><h2>Orion Browser</h2></body></html>';
+    }
   }
 });

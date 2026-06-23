@@ -77,13 +77,13 @@ ipcMain.on('show-context-menu', (event, params) => {
     const template = [];
     if (params.linkURL) {
         template.push({ label: 'Bağlantıyı Kopyala', role: 'copy' });
-        template.push({ label: 'Bağlantıyı Yeni Sekmede Aç', click: () => { event.sender.send('new-tab-url', params.linkURL); } });
+        template.push({ label: 'Bağlantıyı Yeni Sekmede Aç', click: () => { win.webContents.send('new-tab-url', params.linkURL); } });
         template.push({ type: 'separator' });
     }
     if (params.mediaType === 'image') {
         template.push({ label: 'Resmi Kopyala', role: 'copy' });
         template.push({ label: 'Resmi Farklı Kaydet', click: () => { win.webContents.downloadURL(params.srcURL); } });
-        template.push({ label: 'Resmi Yeni Sekmede Aç', click: () => { event.sender.send('new-tab-url', params.srcURL); } });
+        template.push({ label: 'Resmi Yeni Sekmede Aç', click: () => { win.webContents.send('new-tab-url', params.srcURL); } });
         template.push({ type: 'separator' });
     }
     template.push(
