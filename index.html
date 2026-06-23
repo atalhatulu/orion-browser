@@ -12,24 +12,47 @@
   
   <div id="drag-region"></div>
 
+  <!-- SİHİRBAZ MODU YÖNETİM PANELİ (Artık Temayı da içeriyor) -->
+  <div id="magic-mode-panel" class="glass-panel" style="display: none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; padding: 20px 25px; border-radius: 12px; gap: 15px; align-items: center; border: 1px solid rgba(0, 162, 232, 0.5); box-shadow: 0 10px 40px rgba(0,0,0,0.6); flex-direction: column;">
+      
+      <span style="font-size: 15px; font-weight: 500; color: #fff;">🌌 Sihirbaz Modu (Barları Kaydır & Temayı Düzenle)</span>
+      
+      <div style="display: flex; gap: 20px; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 5px;">
+          <div class="settings-group" style="flex: 1; margin: 0; flex-direction: column; align-items: flex-start; gap: 5px;">
+              <label style="color: rgba(255,255,255,0.8); font-size: 12px;">Arka Plan Rengi</label>
+              <input type="color" id="set-color" value="#0d0d0d" style="width: 100%; height: 35px; background:transparent; border:none; cursor:pointer;">
+          </div>
+          <div class="settings-group" style="flex: 1; margin: 0; flex-direction: column; align-items: flex-start; gap: 5px;">
+              <label style="color: rgba(255,255,255,0.8); font-size: 12px;">Pencere Kavisi (<span id="radius-val">12</span>px)</label>
+              <input type="range" id="set-radius" min="0" max="30" value="12" style="width: 100%;">
+          </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; width: 100%; justify-content: flex-end;">
+          <button id="magic-cancel" style="padding: 8px 16px; background: rgba(255, 95, 86, 0.2); border: 1px solid #ff5f56; color: #ff5f56; border-radius: 6px; cursor: pointer; transition: 0.2s; font-family: 'Inter', sans-serif;">İptal</button>
+          <button id="magic-apply" style="padding: 8px 16px; background: rgba(0, 162, 232, 0.2); border: 1px solid #00a2e8; color: #00a2e8; border-radius: 6px; cursor: pointer; transition: 0.2s; font-family: 'Inter', sans-serif; font-weight: 500;">Değişiklikleri Uygula</button>
+      </div>
+  </div>
+
   <div class="orion-browser">
       
-      <!-- ÜST BAR -->
-      <div class="floating-header">
+      <!-- ÜST BAR (LINK BAR) -->
+      <div class="floating-header zone-container" id="zone-header">
           <div class="header-left">
-              <span id="nav-back" title="Geri">&larr;</span>
-              <span id="nav-fwd" title="İleri">&rarr;</span>
+              <span id="nav-back" title="Geri" class="icon-btn">&larr;</span>
+              <span id="nav-fwd" title="İleri" class="icon-btn">&rarr;</span>
+              <span id="nav-reload" title="Yenile" class="icon-btn">&#8635;</span>
           </div>
 
           <div class="header-center">
-              <span id="nav-reload" title="Yenile" class="icon-btn">&#8635;</span>
               <input type="text" id="url-input" placeholder="Google'da ara veya URL gir..." autocomplete="off" spellcheck="false" />
               <span id="new-tab-btn" title="Yeni Sekme" class="icon-btn" style="font-size: 20px; font-weight: bold;">+</span>
               <span id="close-tab-btn" title="Geçerli Sekmeyi Kapat" class="icon-btn" style="font-size: 20px; font-weight: bold; color: #ff5f56;">&times;</span>
           </div>
 
           <div class="header-right">
-              <span id="settings-btn" title="Ayarlar" class="icon-btn">⚙</span>
+              <span id="edit-mode-btn" title="Sihirbaz Modu (Ctrl+E)" class="icon-btn" style="color: #00a2e8;">🛠️</span>
+              <span id="settings-btn" title="Gelişmiş Ayarlar (Yakında)" class="icon-btn">⚙</span>
               <span class="header-divider"></span>
               <div id="window-controls" class="orion-dots">
                   <button class="win-btn minimize" id="min-btn"></button>
@@ -40,21 +63,20 @@
       </div>
 
       <!-- ANA SÖRF ALANI -->
-      <div class="surfing-area">
-          <button id="prev-tab-btn" class="tab-switch-btn left-switch" title="Önceki Sekme">&lang;</button>
-          <button id="next-tab-btn" class="tab-switch-btn right-switch" title="Sonraki Sekme">&rang;</button>
-          
+      <div class="surfing-area zone-container" id="zone-surf">
+          <button id="prev-tab-btn" class="tab-switch-btn left-switch" title="Önceki Sekme" style="display: none;">&lang;</button>
+          <button id="next-tab-btn" class="tab-switch-btn right-switch" title="Sonraki Sekme" style="display: none;">&rang;</button>
           <div id="content-area"></div>
       </div>
 
-      <!-- ALT DURUM ÇUBUĞU -->
-      <div class="bottom-bar">
+      <!-- ALT DURUM ÇUBUĞU (INFO BAR) -->
+      <div class="bottom-bar zone-container" id="zone-bottom">
           <div class="bottom-left">
-              <span class="status-badge glass-badge">Orion Core</span>
+              <span class="status-badge glass-badge">Orion v1.0.0</span>
               <span class="dot-sep">&bull;</span>
-              <span id="tracker-count">0 İzleyici Engellendi</span>
+              <span id="tracker-count" class="toggleable-status" title="Reklam Engelleyici">🛡️ 0 Engellendi</span>
               <span class="dot-sep">&bull;</span>
-              <span class="status-secure">🔒 Güvenli Ağ</span>
+              <span id="vpn-toggle" class="toggleable-status">🌍 VPN Kapalı</span>
           </div>
           
           <div class="bottom-center" id="tab-dots-container"></div>
@@ -62,40 +84,19 @@
           <div class="bottom-right">
               <span id="download-status" class="net-speed" style="display: none; color: #3b82f6;">📥 İndiriliyor...</span>
               <span id="download-sep" class="dot-sep" style="display: none;">&bull;</span>
-              <span class="net-speed">Yükleniyor...</span>
+              <span class="net-speed" id="net-speed-display">-- Mbps</span>
           </div>
       </div>
 
   </div>
 
-  <!-- AYARLAR MODALI -->
+  <!-- GELİŞMİŞ AYARLAR MODALI (Tema kısmı çıkarıldı, gelecek eklentiler için altyapı) -->
   <div id="settings-modal" class="modal-overlay" style="display: none;">
       <div class="modal-content glass-panel">
           <span class="modal-close" id="close-settings">&times;</span>
-          <h2>🌌 Orion Özelleştirme Merkezi</h2>
-          
-          <div class="settings-group">
-              <label>Arka Plan Rengi (Tema):</label>
-              <input type="color" id="set-color" value="#0d0d0d" style="background:transparent; border:none; cursor:pointer;">
-          </div>
-          <div class="settings-group">
-              <label>Pencere Kavis Miktarı:</label>
-              <input type="range" id="set-radius" min="0" max="30" value="12">
-          </div>
-          <div class="settings-group">
-              <label>Arayüz Dizilimi:</label>
-              <select id="set-layout">
-                  <option value="top">Klasik (Üstte Arama)</option>
-                  <option value="bottom">Mobil / Alt (Arama Altta)</option>
-              </select>
-          </div>
-          <div class="settings-group">
-              <label>Tarayıcı Motoru Güvenliği:</label>
-              <input type="checkbox" checked disabled> <span style="font-size:12px; color:#4ade80;">(Chromium Kalkanı Açık)</span>
-          </div>
-
-          <div class="settings-group" style="margin-top: 20px; text-align: center;">
-              <p style="color: rgba(255,255,255,0.4); font-size: 11px;">Orion Browser v1.0.0<br>Sınırları Kaldır, Şeklini Sen Ver.</p>
+          <h2>⚙️ Gelişmiş Ayarlar</h2>
+          <div class="settings-group" style="justify-content: center; opacity: 0.5;">
+              <label>Yakında eklenecek...</label>
           </div>
       </div>
   </div>
