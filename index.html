@@ -25,6 +25,7 @@
               <span id="nav-reload" title="Yenile" class="icon-btn">&#8635;</span>
               <input type="text" id="url-input" placeholder="Google'da ara veya URL gir..." autocomplete="off" spellcheck="false" />
               <span id="new-tab-btn" title="Yeni Sekme" class="icon-btn" style="font-size: 20px; font-weight: bold;">+</span>
+              <span id="close-tab-btn" title="Geçerli Sekmeyi Kapat" class="icon-btn" style="font-size: 20px; font-weight: bold; color: #ff5f56;">&times;</span>
           </div>
 
           <div class="header-right">
@@ -49,11 +50,11 @@
       <!-- ALT DURUM ÇUBUĞU -->
       <div class="bottom-bar">
           <div class="bottom-left">
-              <span class="status-badge glass-badge">Glass Mode</span>
+              <span class="status-badge glass-badge">Orion Core</span>
               <span class="dot-sep">&bull;</span>
-              <span>100 trackers blocked</span>
+              <span id="tracker-count">0 İzleyici Engellendi</span>
               <span class="dot-sep">&bull;</span>
-              <span class="status-secure">🔒 Secure</span>
+              <span class="status-secure">🔒 Güvenli Ağ</span>
           </div>
           
           <div class="bottom-center" id="tab-dots-container"></div>
@@ -61,7 +62,7 @@
           <div class="bottom-right">
               <span id="download-status" class="net-speed" style="display: none; color: #3b82f6;">📥 İndiriliyor...</span>
               <span id="download-sep" class="dot-sep" style="display: none;">&bull;</span>
-              <span class="version-text">Orion v1.0.0</span>
+              <span class="net-speed">Yükleniyor...</span>
           </div>
       </div>
 
@@ -71,21 +72,30 @@
   <div id="settings-modal" class="modal-overlay" style="display: none;">
       <div class="modal-content glass-panel">
           <span class="modal-close" id="close-settings">&times;</span>
-          <h2>Orion Ayarları</h2>
+          <h2>🌌 Orion Özelleştirme Merkezi</h2>
+          
           <div class="settings-group">
-              <label>Arama Motoru:</label>
-              <select><option>Google</option><option>DuckDuckGo</option><option>Bing</option></select>
+              <label>Arka Plan Rengi (Tema):</label>
+              <input type="color" id="set-color" value="#0d0d0d" style="background:transparent; border:none; cursor:pointer;">
           </div>
           <div class="settings-group">
-              <label>Karanlık Mod:</label>
-              <input type="checkbox" checked disabled> <span style="font-size:12px; color:gray;">(Zorunlu Saf Siyah)</span>
+              <label>Pencere Kavis Miktarı:</label>
+              <input type="range" id="set-radius" min="0" max="30" value="12">
           </div>
           <div class="settings-group">
-              <label>Reklam Engelleyici:</label>
-              <input type="checkbox" checked> <span style="font-size:12px; color:gray;">(Aktif)</span>
+              <label>Arayüz Dizilimi:</label>
+              <select id="set-layout">
+                  <option value="top">Klasik (Üstte Arama)</option>
+                  <option value="bottom">Mobil / Alt (Arama Altta)</option>
+              </select>
           </div>
+          <div class="settings-group">
+              <label>Tarayıcı Motoru Güvenliği:</label>
+              <input type="checkbox" checked disabled> <span style="font-size:12px; color:#4ade80;">(Chromium Kalkanı Açık)</span>
+          </div>
+
           <div class="settings-group" style="margin-top: 20px; text-align: center;">
-              <p style="color: rgba(255,255,255,0.4); font-size: 11px;">Orion Browser v1.0.0<br>Powered by Chromium & Electron</p>
+              <p style="color: rgba(255,255,255,0.4); font-size: 11px;">Orion Browser v1.0.0<br>Sınırları Kaldır, Şeklini Sen Ver.</p>
           </div>
       </div>
   </div>

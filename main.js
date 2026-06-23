@@ -1,7 +1,8 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, session } = require('electron');
 const path = require('path');
 
 let win;
+let blockedCount = 0; // Engellenen reklam/izleyici sayısı
 
 function createWindow() {
   win = new BrowserWindow({
@@ -23,6 +24,27 @@ function createWindow() {
   });
   win.on('unmaximize', () => {
       if (win.webContents) win.webContents.send('window-state', 'unmaximized');
+  });
+
+  // --- 3. AŞAMA: GÜVENLİK VE HIZ (ADBLOCKER) ---
+  const adBlockList = [
+      '*://*.doubleclick.net/*',
+      '*://*.google-analytics.com/*',
+      '*://*.googlesyndication.com/*',
+      '*://*.facebook.net/*',
+      '*://*.adnxs.com/*',
+      '*://*.adsystem.com/*',
+      '*://*.taboola.com/*',
+      '*://*.outbrain.com/*'
+  ];
+
+  session.defaultSession.webRequest.onBeforeRequest({ urls: adBlockList }, (details, callback) => {
+      blockedCount++;
+      // Arayüze sayıyı gönder
+      if (win && win.webContents) {
+          win.webContents.send('tracker-blocked', blockedCount);
+      }
+      callback({ cancel: true }); // Ağ isteğini daha yüklenmeden doğrudan reddet (Hızlandırır)
   });
 
   // İNDİRME YÖNETİCİSİ
@@ -50,18 +72,16 @@ app.on('window-all-closed', () => {
   }
 });
 
-// SAĞ TIK MENÜSÜ (DİNAMİK)
+// SAĞ TIK MENÜSÜ
 ipcMain.on('show-context-menu', (event, params) => {
     const template = [];
 
-    // Linke tıklandıysa
     if (params.linkURL) {
         template.push({ label: 'Bağlantıyı Kopyala', role: 'copy' });
         template.push({ label: 'Bağlantıyı Yeni Sekmede Aç', click: () => { event.sender.send('new-tab-url', params.linkURL); } });
         template.push({ type: 'separator' });
     }
 
-    // GÖRSEL TIKLANDIYSA GÖRSEL ÖZELLİKLERİ EKLENİYOR
     if (params.mediaType === 'image') {
         template.push({ label: 'Resmi Kopyala', role: 'copy' });
         template.push({ label: 'Resmi Farklı Kaydet', click: () => { win.webContents.downloadURL(params.srcURL); } });

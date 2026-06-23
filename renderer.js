@@ -10,10 +10,42 @@ document.getElementById('min-btn').addEventListener('click', () => ipcRenderer.s
 document.getElementById('max-btn').addEventListener('click', () => ipcRenderer.send('window-maximize'));
 document.getElementById('close-btn').addEventListener('click', () => ipcRenderer.send('window-close'));
 
-// --- AYARLAR MODALI ---
+// --- AYARLAR MODALI & ÖZELLEŞTİRME (TEMA MOTORU) ---
 const settingsModal = document.getElementById('settings-modal');
 document.getElementById('settings-btn').addEventListener('click', () => settingsModal.style.display = 'flex');
 document.getElementById('close-settings').addEventListener('click', () => settingsModal.style.display = 'none');
+
+const colorPicker = document.getElementById('set-color');
+const radiusSlider = document.getElementById('set-radius');
+const layoutSelector = document.getElementById('set-layout');
+
+// Kayıtlı Ayarları Yükle
+const savedColor = localStorage.getItem('orion-bg-color') || '#0d0d0d';
+const savedRadius = localStorage.getItem('orion-surf-radius') || '12';
+const savedLayout = localStorage.getItem('orion-layout') || 'top';
+
+document.documentElement.style.setProperty('--bg-color', savedColor);
+document.documentElement.style.setProperty('--surf-radius', `${savedRadius}px`);
+if(savedLayout === 'bottom') document.body.classList.add('layout-url-bottom');
+
+colorPicker.value = savedColor;
+radiusSlider.value = savedRadius;
+layoutSelector.value = savedLayout;
+
+// Ayarlar Değiştiğinde Canlı Uygula ve Kaydet
+colorPicker.addEventListener('input', (e) => {
+    document.documentElement.style.setProperty('--bg-color', e.target.value);
+    localStorage.setItem('orion-bg-color', e.target.value);
+});
+radiusSlider.addEventListener('input', (e) => {
+    document.documentElement.style.setProperty('--surf-radius', `${e.target.value}px`);
+    localStorage.setItem('orion-surf-radius', e.target.value);
+});
+layoutSelector.addEventListener('change', (e) => {
+    if(e.target.value === 'bottom') document.body.classList.add('layout-url-bottom');
+    else document.body.classList.remove('layout-url-bottom');
+    localStorage.setItem('orion-layout', e.target.value);
+});
 
 // --- F11 VE CTRL+W ---
 window.addEventListener('keydown', (e) => {
@@ -33,6 +65,11 @@ document.getElementById('nav-fwd').addEventListener('click', () => {
 document.getElementById('nav-reload').addEventListener('click', () => {
     const activeTab = tabs.find(t => t.id === activeTabId);
     if(activeTab) activeTab.webviewEl.reload();
+});
+
+// --- GÜVENLİK VE ADBLOCKER (İzleyici Engellendi Sayacı) ---
+ipcRenderer.on('tracker-blocked', (e, count) => {
+    document.getElementById('tracker-count').textContent = `${count} İzleyici Engellendi`;
 });
 
 // --- İNDİRME YÖNETİCİSİ ---
@@ -58,10 +95,7 @@ ipcRenderer.on('download-done', (e, data) => {
 // --- İNTERNET HIZI VE PING TAKİBİ ---
 const netSpeedEl = document.querySelector('.net-speed');
 setInterval(async () => {
-    // Tarayıcıdan Mbps tahmini (sadece tahmindir, tam stabil değil)
     let mbps = navigator.connection && navigator.connection.downlink ? Math.round(navigator.connection.downlink * 8) : '--';
-    
-    // Gerçek ms gecikmesini ölç (1.1.1.1'e ping)
     let ms = 0;
     try {
         const start = performance.now();
@@ -70,7 +104,6 @@ setInterval(async () => {
     } catch (e) {
         ms = 'Hata';
     }
-    
     netSpeedEl.textContent = `${mbps} Mbps • ${ms} ms 🟢`;
 }, 5000);
 
@@ -95,7 +128,7 @@ function closeTab(id) {
             if (activeTabId === id) switchTab(tabs[Math.max(0, index - 1)].id);
             else updateDots();
         } else {
-            createTab(); // Son sekme de kapandıysa ana sayfayı aç
+            createTab();
         }
     }
 }
@@ -153,7 +186,6 @@ function createTab(url = null) {
   const id = `tab-${tabCounter++}`;
   
   if (!url) {
-      // Local homepage HTML yüklenir
       url = `file://${path.join(__dirname, 'homepage.html')}`;
   }
 
@@ -164,7 +196,10 @@ function createTab(url = null) {
   const webviewEl = document.createElement('webview');
   webviewEl.id = `wv-${id}`;
   webviewEl.src = url;
-  // Sağ tık menüsü için webview parametrelerini main prosese gönder
+  
+  // GÜVENLİK: İçerik izole edilir ve node integrasyonu engellenir
+  webviewEl.setAttribute('webpreferences', 'contextIsolation=yes, nodeIntegration=no');
+
   webviewEl.addEventListener('context-menu', (e) => {
       e.preventDefault();
       ipcRenderer.send('show-context-menu', e.params);
@@ -202,7 +237,6 @@ async function switchTab(id) {
     if(t.id === id) {
       t.wrapper.className = 'tab-wrapper active';
       urlInput.value = t.webviewEl.getURL() || '';
-      // Eğer url anasayfaysa URL çubuğunda gizleyebiliriz
       if (urlInput.value.includes('homepage.html')) {
           urlInput.value = '';
           urlInput.placeholder = 'Google\'da ara veya URL gir...';
@@ -232,6 +266,9 @@ document.getElementById('next-tab-btn').addEventListener('click', () => {
 });
 
 document.getElementById('new-tab-btn').addEventListener('click', () => createTab());
+document.getElementById('close-tab-btn').addEventListener('click', () => {
+    if(activeTabId) closeTab(activeTabId);
+});
 
 urlInput.addEventListener('keydown', (e) => {
   if(e.key === 'Enter') {

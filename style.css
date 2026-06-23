@@ -1,11 +1,42 @@
+/* 1. AŞAMA: TEMA MOTORU CSS DEĞİŞKENLERİ */
+:root {
+    --bg-color: #0d0d0d;
+    --surf-radius: 12px;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body { font-family: 'Inter', sans-serif; min-height: 100vh; color: #ffffff; overflow: hidden; background: #090909; }
+body { 
+    font-family: 'Inter', sans-serif; 
+    min-height: 100vh; 
+    color: #ffffff; 
+    overflow: hidden; 
+    background: var(--bg-color); /* Dinamik Tema */
+    transition: background 0.3s;
+}
 
 #drag-region { -webkit-app-region: drag; height: 15px; width: 100%; position: absolute; top: 0; left: 0; z-index: 9999; }
 .icon-btn, .header-left span, #url-input, .win-btn, .tab-switch-btn, .tab-dot, .dot-preview { -webkit-app-region: no-drag; }
 
-.orion-browser { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; padding-top: 10px; }
+/* 2. AŞAMA: MODÜLER DİZİLİM MANTIĞI */
+.orion-browser { 
+    display: flex; 
+    flex-direction: column; 
+    width: 100vw; 
+    height: 100vh; 
+    position: relative; 
+    padding-top: 10px; 
+}
+
+/* Modüler: Arama Çubuğu Altta Kuralı */
+body.layout-url-bottom .orion-browser {
+    /* Alt üst oluyor! */
+    flex-direction: column; 
+}
+body.layout-url-bottom .floating-header { order: 3; padding-bottom: 5px; } /* En Alta */
+body.layout-url-bottom .surfing-area { order: 2; margin-bottom: 5px; } /* Ortaya */
+body.layout-url-bottom .bottom-bar { order: 1; margin-bottom: 5px; } /* En Üste */
+
 
 /* ÜST BAR */
 .floating-header {
@@ -40,7 +71,9 @@ body { font-family: 'Inter', sans-serif; min-height: 100vh; color: #ffffff; over
 /* ANA SÖRF ALANI */
 .surfing-area {
     flex-grow: 1; margin: 5px 8px; position: relative; background: #ffffff;
-    border-radius: 12px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    border-radius: var(--surf-radius); /* Dinamik Yuvarlaklık */
+    overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    transition: border-radius 0.3s;
 }
 #content-area { width: 100%; height: 100%; position: relative; background: #000; }
 webview { width: 100%; height: 100%; border: none; }
@@ -51,17 +84,14 @@ webview { width: 100%; height: 100%; border: none; }
 .tab-wrapper.slide-left { transform: scale(0.92) translateX(-40px); }
 .tab-wrapper.slide-right { transform: scale(0.92) translateX(40px); }
 
-/* DÜZELTME: Sekme butonları YALNIZCA üzerine gelindiğinde görünür */
 .tab-switch-btn {
     position: absolute; top: 50%; transform: translateY(-50%); width: 60px; height: 120px;
     background: transparent; border: none; color: transparent;
     font-size: 24px; cursor: pointer; z-index: 90; transition: all 0.3s;
 }
 .tab-switch-btn:hover {
-    background: rgba(18, 18, 18, 0.95);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(18, 18, 18, 0.95); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
 }
 .left-switch { left: 0; border-radius: 0 16px 16px 0; }
 .right-switch { right: 0; border-radius: 16px 0 0 16px; }
@@ -92,6 +122,11 @@ webview { width: 100%; height: 100%; border: none; }
     opacity: 0; pointer-events: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 998; display: flex; flex-direction: column; overflow: hidden;
 }
+
+/* Modüler tasarımda baloncuk yönünü düzelt */
+body.layout-url-bottom .dot-preview { bottom: auto; top: 30px; transform: translateX(-50%) translateY(-10px); }
+body.layout-url-bottom .dot-wrapper:hover .dot-preview { transform: translateX(-50%) translateY(0); }
+
 .dot-wrapper:hover .dot-preview { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
 
 .preview-img { width: 100%; height: 100px; background-size: cover; background-position: top center; background-color: #222; }
@@ -119,4 +154,4 @@ webview { width: 100%; height: 100%; border: none; }
 .modal-content h2 { font-weight: 500; margin-bottom: 24px; font-size: 18px; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
 .settings-group { margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
 .settings-group label { font-size: 13px; color: rgba(255,255,255,0.8); }
-.settings-group select { background: #222; color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; outline: none; }
+.settings-group select, .settings-group input[type="color"] { background: #222; color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; outline: none; }
