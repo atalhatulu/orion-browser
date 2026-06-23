@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ayarlar - Orion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0a0a0a; --panel-bg: rgba(var(--text-color-rgb, 255, 255, 255), 0.05); --text: var(--text-color, #ffffff); --accent: #00a2e8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; }
+        
+        .settings-container { display: flex; width: 100%; height: 100%; }
+        
+        .sidebar { width: 260px; background: rgba(0,0,0,0.4); border-right: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.05); padding: 30px 20px; display: flex; flex-direction: column; gap: 30px; }
+        .sidebar h2 { font-weight: 500; font-size: 20px; letter-spacing: 1px; color: rgba(var(--text-color-rgb, 255, 255, 255), 0.8); }
+        .sidebar nav { display: flex; flex-direction: column; gap: 8px; }
+        
+        .nav-btn { background: transparent; border: none; color: rgba(var(--text-color-rgb, 255, 255, 255), 0.6); padding: 12px 16px; border-radius: 8px; text-align: left; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .nav-btn:hover { background: rgba(var(--text-color-rgb, 255, 255, 255), 0.05); color: var(--text-color, #fff); }
+        .nav-btn.active { background: rgba(0, 162, 232, 0.15); color: var(--accent); }
+        
+        .content { flex: 1; padding: 50px 60px; overflow-y: auto; }
+        section { display: none; animation: fadeIn 0.3s ease; }
+        section.active-section { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        h1 { font-weight: 400; font-size: 28px; margin-bottom: 30px; border-bottom: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1); padding-bottom: 15px; }
+        
+        .card { background: var(--panel-bg); border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.05); border-radius: 12px; padding: 25px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .card h3 { font-size: 16px; font-weight: 500; }
+        .card p { font-size: 13px; color: rgba(var(--text-color-rgb, 255, 255, 255), 0.6); line-height: 1.5; }
+        
+        select { background: rgba(0,0,0,0.3); border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1); color: var(--text-color, #fff); padding: 10px 15px; border-radius: 8px; outline: none; font-family: 'Inter', sans-serif; cursor: pointer; }
+        
+        .primary-btn { background: rgba(0, 162, 232, 0.2); border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; cursor: pointer; transition: 0.2s; width: fit-content; font-weight: 500; }
+        .primary-btn:hover { background: rgba(0, 162, 232, 0.4); color: var(--text-color, #fff); }
+        
+        .glass-card { background: linear-gradient(135deg, rgba(var(--text-color-rgb, 255, 255, 255), 0.05), rgba(var(--text-color-rgb, 255, 255, 255), 0.01)); backdrop-filter: blur(10px); border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); }
+
+        /* Switch toggle CSS */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(var(--text-color-rgb, 255, 255, 255), 0.1); transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--text-color, white); transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        body.edit-mode .sidebar { pointer-events: none; opacity: 0.3; }
+        body.edit-mode .card:not(#magic-card) { pointer-events: none; opacity: 0.3; }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <aside class="sidebar">
+            <h2>🌌 Orion Ayarlar</h2>
+            <nav>
+                <button class="nav-btn active" data-target="genel">⚙️ Genel</button>
+                <button class="nav-btn" data-target="gorunum">🎨 Görünüm</button>
+                <button class="nav-btn" data-target="guvenlik">🛡️ Gizlilik & VPN</button>
+            </nav>
+        </aside>
+        
+        <main class="content">
+            <!-- GENEL AYARLAR -->
+            <section id="genel" class="active-section">
+                <h1>Genel Ayarlar</h1>
+                <div class="card">
+                    <h3>Varsayılan Arama Motoru</h3>
+                    <p>Adres çubuğunda arama yaptığınızda kullanılacak motoru seçin.</p>
+                    <select id="search-engine">
+                        <option value="google">Google</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                        <option value="bing">Bing</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <h3>Başlangıçta</h3>
+                    <select id="startup-behavior">
+                        <option value="homepage">Ana Sayfayı Aç</option>
+                        <option value="continue" disabled>Kaldığım Yerden Devam Et (Yakında)</option>
+                    </select>
+                </div>
+            </section>
+            
+            <!-- GÖRÜNÜM AYARLARI -->
+            <section id="gorunum">
+                <h1>Görünüm & Kişiselleştirme</h1>
+                
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Arka Plan Rengi</h3>
+                            <p style="margin-top:5px;">Tarayıcının ana tema rengini değiştirin.</p>
+                        </div>
+                        <input type="color" id="bg-color-picker" value="#0d0d0d" style="width: 50px; height: 35px; background:transparent; border:none; cursor:pointer;">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Yazı Rengi</h3>
+                            <p style="margin-top:5px;">Tarayıcının ana metin rengini değiştirin.</p>
+                        </div>
+                        <input type="color" id="text-color-picker" value="#ffffff" style="width: 50px; height: 35px; background:transparent; border:none; cursor:pointer;">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Pencere Kavisi (<span id="radius-val">12</span>px)</h3>
+                    <p style="margin-bottom: 10px;">Köşelerin yuvarlaklık derecesini ayarlayın.</p>
+                    <input type="range" id="radius-slider" min="0" max="30" value="12" style="width: 100%;">
+                </div>
+
+                <div class="card glass-card" id="magic-card">
+                    <h3>🛠️ Düzenleme Sihirbazı</h3>
+                    <p>Sihirbazı açarak; Link bar, Sörf alanı ve Info barın yerlerini yukarı/aşağı butonlarıyla fiziksel olarak değiştirebilirsiniz.</p>
+                    <br>
+                    <button id="trigger-magic" class="primary-btn">Düzenleme Modunu Aç</button>
+                </div>
+            </section>
+
+            <!-- GİZLİLİK AYARLARI -->
+            <section id="guvenlik">
+                <h1>Gizlilik & Ağ Ayarları</h1>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Reklam ve İzleyici Engelleyici</h3>
+                            <p style="margin-top:5px;">Zararlı siteleri, izleyicileri ve reklamları engeller.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Dahili VPN</h3>
+                            <p style="margin-top:5px;">Bağlantınızı şifreleyin ve coğrafi kısıtlamaları aşın.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        let ipcRenderer = null;
+        try {
+            ipcRenderer = require('electron').ipcRenderer;
+        } catch (e) {
+            console.warn("Electron IPC çalıştırılamadı (Güvenlik Koruması). Tema değişiklikleri anlık yansımayabilir.");
+        }
+
+        // Menü Gezintisi
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('section').forEach(s => s.classList.remove('active-section'));
+                
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.target).classList.add('active-section');
+            });
+        });
+
+        // Tema rengi değişimi (Anlık)
+        const colorPicker = document.getElementById('bg-color-picker');
+        if (colorPicker) {
+            colorPicker.value = localStorage.getItem('orion-bg-color') || '#0d0d0d';
+            colorPicker.addEventListener('input', (e) => {
+                console.log("ORION_IPC:update-bg-color:" + e.target.value);
+            });
+        }
+
+        const textColorPicker = document.getElementById('text-color-picker');
+        if (textColorPicker) {
+            textColorPicker.value = localStorage.getItem('orion-text-color') || '#ffffff';
+            textColorPicker.addEventListener('input', (e) => {
+                console.log("ORION_IPC:update-text-color:" + e.target.value);
+            });
+        }
+
+        // Kavis değişimi (Anlık)
+        const radiusSlider = document.getElementById('radius-slider');
+        const radiusVal = document.getElementById('radius-val');
+        if (radiusSlider) {
+            radiusSlider.value = localStorage.getItem('orion-surf-radius') || '12';
+            radiusVal.innerText = radiusSlider.value;
+            radiusSlider.addEventListener('input', (e) => {
+                radiusVal.innerText = e.target.value;
+                console.log("ORION_IPC:update-radius:" + e.target.value);
+            });
+        }
+
+        // Sihirbazı Başlatma IPC İletişimi
+        const triggerMagic = document.getElementById('trigger-magic');
+        if (triggerMagic) {
+            triggerMagic.addEventListener('click', (e) => {
+                console.log("ORION_IPC:toggle-magic-mode:true");
+            });
+        }
+    </script>
+</body>
+</html>

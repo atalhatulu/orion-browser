@@ -5,13 +5,35 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "dev": "concurrently \"electron .\" \"electron-wait-for-react-scripts\"",
+    "watch": "electron-reload .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write ."
+  },
+  "build": {
+    "appId": "com.orion.browser",
+    "productName": "OrionBrowser",
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ]
+    }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^42.4.1"
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3",
+    "electron-reload": "^1.5.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "concurrently": "^8.2.2"
   }
 }

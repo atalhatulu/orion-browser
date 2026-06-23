@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, Menu, session } = require('electron');
 const path = require('path');
 
+app.disableHardwareAcceleration(); // Linux sistemlerdeki GPU crash (boş siyah ekran) sorununu çözer
 let win;
 let blockedCount = 0; 
 let adblockEnabled = true;
@@ -13,9 +14,11 @@ function createWindow() {
     transparent: true,
     frame: false, 
     webPreferences: {
-      webviewTag: true,
-      nodeIntegration: true,
-      contextIsolation: false
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
+      webviewTag: true
     }
   });
 
