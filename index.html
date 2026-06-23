@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Orion Browser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <div id="drag-region"></div>
+
+  <div class="orion-browser">
+      
+      <!-- ÜST BAR -->
+      <div class="floating-header">
+          <div class="header-left">
+              <span id="nav-back" title="Geri">&larr;</span>
+              <span id="nav-fwd" title="İleri">&rarr;</span>
+          </div>
+
+          <div class="header-center">
+              <span id="nav-reload" title="Yenile" class="icon-btn">&#8635;</span>
+              <input type="text" id="url-input" placeholder="Google'da ara veya URL gir..." autocomplete="off" spellcheck="false" />
+              <span id="new-tab-btn" title="Yeni Sekme" class="icon-btn" style="font-size: 20px; font-weight: bold;">+</span>
+          </div>
+
+          <div class="header-right">
+              <span id="settings-btn" title="Ayarlar" class="icon-btn">⚙</span>
+              <span class="header-divider"></span>
+              <div id="window-controls" class="orion-dots">
+                  <button class="win-btn minimize" id="min-btn"></button>
+                  <button class="win-btn maximize" id="max-btn"></button>
+                  <button class="win-btn close" id="close-btn"></button>
+              </div>
+          </div>
+      </div>
+
+      <!-- ANA SÖRF ALANI -->
+      <div class="surfing-area">
+          <button id="prev-tab-btn" class="tab-switch-btn left-switch" title="Önceki Sekme">&lang;</button>
+          <button id="next-tab-btn" class="tab-switch-btn right-switch" title="Sonraki Sekme">&rang;</button>
+          
+          <div id="content-area"></div>
+      </div>
+
+      <!-- ALT DURUM ÇUBUĞU -->
+      <div class="bottom-bar">
+          <div class="bottom-left">
+              <span class="status-badge glass-badge">Glass Mode</span>
+              <span class="dot-sep">&bull;</span>
+              <span>100 trackers blocked</span>
+              <span class="dot-sep">&bull;</span>
+              <span class="status-secure">🔒 Secure</span>
+          </div>
+          
+          <div class="bottom-center" id="tab-dots-container"></div>
+          
+          <div class="bottom-right">
+              <span id="download-status" class="net-speed" style="display: none; color: #3b82f6;">📥 İndiriliyor...</span>
+              <span id="download-sep" class="dot-sep" style="display: none;">&bull;</span>
+              <span class="version-text">Orion v1.0.0</span>
+          </div>
+      </div>
+
+  </div>
+
+  <!-- AYARLAR MODALI -->
+  <div id="settings-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content glass-panel">
+          <span class="modal-close" id="close-settings">&times;</span>
+          <h2>Orion Ayarları</h2>
+          <div class="settings-group">
+              <label>Arama Motoru:</label>
+              <select><option>Google</option><option>DuckDuckGo</option><option>Bing</option></select>
+          </div>
+          <div class="settings-group">
+              <label>Karanlık Mod:</label>
+              <input type="checkbox" checked disabled> <span style="font-size:12px; color:gray;">(Zorunlu Saf Siyah)</span>
+          </div>
+          <div class="settings-group">
+              <label>Reklam Engelleyici:</label>
+              <input type="checkbox" checked> <span style="font-size:12px; color:gray;">(Aktif)</span>
+          </div>
+          <div class="settings-group" style="margin-top: 20px; text-align: center;">
+              <p style="color: rgba(255,255,255,0.4); font-size: 11px;">Orion Browser v1.0.0<br>Powered by Chromium & Electron</p>
+          </div>
+      </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

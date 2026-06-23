@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Orion Start</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0; padding: 0;
+            height: 100vh;
+            background: #0d0d0d;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        /* Uzay / Cam arkası nebula efekti */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(114, 46, 209, 0.1) 0%, rgba(0,0,0,0) 70%);
+            top: -20%; right: -10%;
+            z-index: 0; pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(0, 162, 232, 0.05) 0%, rgba(0,0,0,0) 70%);
+            bottom: -10%; left: -10%;
+            z-index: 0; pointer-events: none;
+        }
+        
+        .container {
+            z-index: 10;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .time {
+            font-size: 84px;
+            font-weight: 300;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .date {
+            font-size: 16px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 50px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .search-box {
+            position: relative;
+            width: 600px;
+            max-width: 90vw;
+        }
+        .search-input {
+            width: 100%;
+            padding: 18px 24px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+        .shortcuts {
+            display: flex;
+            gap: 24px;
+            margin-top: 50px;
+            justify-content: center;
+        }
+        .shortcut {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: rgba(255,255,255,0.6);
+            transition: 0.3s;
+        }
+        .shortcut:hover { color: white; transform: translateY(-5px); }
+        .icon {
+            width: 50px; height: 50px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="time" id="clock">00:00</div>
+        <div class="date" id="date">Yükleniyor...</div>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" id="search" placeholder="Google'da arama yap..." autofocus>
+        </div>
+
+        <div class="shortcuts">
+            <a href="https://github.com" class="shortcut">
+                <div class="icon">🐙</div>
+                <span>GitHub</span>
+            </a>
+            <a href="https://youtube.com" class="shortcut">
+                <div class="icon">▶️</div>
+                <span>YouTube</span>
+            </a>
+            <a href="https://atalhatulu.com" class="shortcut">
+                <div class="icon">👨‍💻</div>
+                <span>Atalhatulu</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('date').textContent = now.toLocaleDateString('tr-TR', { weekday: 'long', month: 'long', day: 'numeric' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.getElementById('search').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(e.target.value);
+            }
+        });
+    </script>
+</body>
+</html>
