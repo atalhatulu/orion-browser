@@ -57,6 +57,9 @@
                 <button class="nav-btn active" data-target="genel">⚙️ Genel</button>
                 <button class="nav-btn" data-target="gorunum">🎨 Görünüm</button>
                 <button class="nav-btn" data-target="guvenlik">🛡️ Gizlilik & VPN</button>
+                <button class="nav-btn" data-target="indirme">📥 İndirmeler</button>
+                <button class="nav-btn" data-target="gecmis">🕐 Geçmiş</button>
+                <button class="nav-btn" data-target="kisayol">🔗 Kısayollar</button>
             </nav>
         </aside>
         
@@ -145,6 +148,70 @@
                             <input type="checkbox">
                             <span class="slider"></span>
                         </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- İNDİRME AYARLARI -->
+            <section id="indirme">
+                <h1>İndirme Ayarları</h1>
+                <div class="card">
+                    <h3>İndirme Konumu</h3>
+                    <p>Dosyaların kaydedileceği varsayılan klasör.</p>
+                    <select id="download-path">
+                        <option value="downloads">İndirilenler</option>
+                        <option value="desktop">Masaüstü</option>
+                        <option value="ask">Her seferinde sor</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Otomatik Aç</h3>
+                            <p style="margin-top:5px;">İndirme tamamlanınca dosyayı otomatik aç.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="auto-open">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GEÇMİŞ AYARLARI -->
+            <section id="gecmis">
+                <h1>Geçmiş Ayarları</h1>
+                <div class="card">
+                    <h3>Tarama Geçmişi</h3>
+                    <p>Ziyaret ettiğiniz sayfaların kaydı tutulur.</p>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="primary-btn" onclick="console.log('ORION_IPC:open-history:true')">📖 Geçmişi Görüntüle</button>
+                        <button class="primary-btn" style="border-color:#ff5f56;color:#ff5f56;background:rgba(255,95,86,0.1);" onclick="console.log('ORION_IPC:clear-history:true')">🗑️ Geçmişi Temizle</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Geçmiş Kaydı</h3>
+                            <p style="margin-top:5px;">Tarama geçmişini kaydetmeyi aç/kapa.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="history-enabled" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KISAYOL AYARLARI -->
+            <section id="kisayol">
+                <h1>Ana Sayfa Kısayolları</h1>
+                <div class="card">
+                    <h3>Sık Kullanılan Siteler</h3>
+                    <p>Ana sayfada görünen kısayolları yönetin.</p>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="primary-btn" onclick="console.log('ORION_IPC:manage-shortcuts:true')">🔗 Kısayolları Düzenle</button>
+                        <button class="primary-btn" style="border-color:#ff5f56;color:#ff5f56;background:rgba(255,95,86,0.1);" onclick="console.log('ORION_IPC:reset-shortcuts:true')">🔄 Varsayılana Dön</button>
                     </div>
                 </div>
             </section>

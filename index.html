@@ -25,9 +25,10 @@
           </div>
 
           <div class="header-center">
+              <span id="bookmark-btn" title="Yer İmi Ekle" class="icon-btn">☆</span>
               <span id="nav-reload" title="Yenile" class="icon-btn" style="margin-right: 5px;">↻</span>
-              <input type="text" id="url-input" placeholder="Google'da ara veya URL gir..." autocomplete="off" spellcheck="false" />
-              <span id="new-tab-btn" title="Yeni Sekme" class="icon-btn" style="font-size: 20px; font-weight: bold; color: var(--accent); padding-bottom: 6px; margin-left: 5px;">+</span>
+              <input type="text" id="url-input" placeholder="Google'da ara veya URL gir..." spellcheck="false" autofocus />
+              <span id="new-tab-btn" title="Yeni Sekme" class="icon-btn" style="margin-left: 5px;">+</span>
           </div>
 
           <div class="header-right">
@@ -35,11 +36,19 @@
                   <span id="menu-btn" title="Menü" class="icon-btn">☰</span>
                   <div id="dropdown-menu" class="dropdown-menu">
                       <div class="menu-item" data-action="settings">⚙️ Ayarlar</div>
+                      <div class="menu-item" data-action="profile">👤 Profil</div>
+                      <div class="menu-divider"></div>
+                      <div class="menu-item" data-action="new-window">🪟 Yeni Pencere</div>
+                      <div class="menu-item" data-action="incognito">🕶️ Gizli Sekme</div>
+                      <div class="menu-divider"></div>
                       <div class="menu-item" data-action="extensions">🧩 Eklentiler</div>
                       <div class="menu-item" data-action="appearance">🎨 Görünüm</div>
+                      <div class="menu-item" data-action="find">🔍 Sayfada Bul</div>
                       <div class="menu-divider"></div>
+                      <div class="menu-item" data-action="print">🖨️ Yazdır</div>
                       <div class="menu-item" data-action="downloads">📥 İndirilenler</div>
                       <div class="menu-item" data-action="history">🕐 Geçmiş</div>
+                      <div class="menu-item" data-action="bookmarks">🔖 Yer İmleri</div>
                       <div class="menu-divider"></div>
                       <div class="menu-item" data-action="about">ℹ️ Hakkında</div>
                   </div>
@@ -57,17 +66,46 @@
       <div class="surfing-area zone-container" id="zone-surf">
           <div class="zone-controls" style="display: none !important;"></div>
           
-          <!-- Ana Sayfa (HTML'e gömülü, her zaman hazır) -->
-          <div id="homepage-container" class="homepage-container">
+          <!-- Ana Sayfa (yedek) -->
+          <div id="homepage-container" class="homepage-container hidden">
               <div class="hp-time" id="hp-clock">00:00</div>
               <div class="hp-date" id="hp-date">Yükleniyor...</div>
               <div class="hp-search-box">
                   <input type="text" class="hp-search-input" id="hp-search" placeholder="Google'da arama yap..." autofocus>
               </div>
-              <div class="hp-shortcuts">
-                  <a href="https://github.com" class="hp-shortcut"><div class="hp-icon">🐙</div><span>GitHub</span></a>
-                  <a href="https://youtube.com" class="hp-shortcut"><div class="hp-icon">▶️</div><span>YouTube</span></a>
-                  <a href="#" class="hp-shortcut" id="hp-settings-link"><div class="hp-icon">⚙️</div><span>Ayarlar</span></a>
+              <div class="hp-shortcuts" id="hp-shortcuts-root">
+              </div>
+          </div>
+          <div class="hp-customize-btn" id="hp-customize-btn" title="Ana Sayfayı Özelleştir">✏️</div>
+          
+          <!-- Ana Sayfa Özelleştirme Sidebar -->
+          <div class="hp-sidebar" id="hp-sidebar">
+              <div class="hp-sidebar-header">
+                  <span>🎨 Ana Sayfa</span>
+                  <span class="hp-sidebar-close" id="hp-sidebar-close">✕</span>
+              </div>
+              <div class="hp-sidebar-body">
+                  <div class="hp-sidebar-group">
+                      <label>Arkaplan Rengi</label>
+                      <input type="color" id="hp-bg-picker" value="#0d0d0d">
+                  </div>
+                  <div class="hp-sidebar-group">
+                      <label>Kısayol Sırası</label>
+                      <select id="hp-rows-select">
+                          <option value="1">1 Sıra</option>
+                          <option value="2" selected>2 Sıra</option>
+                          <option value="3">3 Sıra</option>
+                      </select>
+                  </div>
+                  <div class="hp-sidebar-group">
+                      <label>Widget'lar</label>
+                      <div class="hp-sidebar-toggle"><span>Saat</span><input type="checkbox" id="hp-widget-clock" checked></div>
+                      <div class="hp-sidebar-toggle"><span>Arama Çubuğu</span><input type="checkbox" id="hp-widget-search" checked></div>
+                      <div class="hp-sidebar-toggle"><span>Kısayollar</span><input type="checkbox" id="hp-widget-shortcuts" checked></div>
+                  </div>
+              </div>
+              <div class="hp-sidebar-footer">
+                  <button id="hp-sidebar-settings" class="hp-sidebar-btn">⚙️ Diğer Ayarlar</button>
               </div>
           </div>
           

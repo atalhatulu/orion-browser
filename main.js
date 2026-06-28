@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, Menu, session } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 app.disableHardwareAcceleration(); // Linux sistemlerdeki GPU crash (boş siyah ekran) sorununu çözer
 let win;
@@ -53,7 +54,7 @@ function createWindow() {
       item.on('updated', (event, state) => {
           if (state === 'progressing') {
               const progress = Math.round((item.getReceivedBytes() / item.getTotalBytes()) * 100);
-              win.webContents.send('download-progress', { filename: item.getFilename(), progress });
+              win.webContents.send('download-progress', { filename: item.getFilename(), progress, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() });
           }
       });
 
@@ -107,3 +108,85 @@ ipcMain.on('window-close', () => win.close());
 ipcMain.on('toggle-fullscreen', () => { win.setFullScreen(!win.isFullScreen()); });
 // Yeni eklenen explicit fullscreen kontrolü
 ipcMain.on('set-fullscreen', (e, state) => { win.setFullScreen(state); });
+
+// Yeni pencere
+ipcMain.on('new-window', () => {
+  const { BrowserWindow } = require('electron');
+  const newWin = new BrowserWindow({
+    width: 1400, height: 900,
+    titleBarStyle: 'hidden', transparent: true, frame: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false, contextIsolation: true, sandbox: false, webviewTag: true
+    }
+  });
+  newWin.loadFile('index.html');
+});
+
+// Gizli pencere
+ipcMain.on('new-incognito-window', () => {
+  const { BrowserWindow } = require('electron');
+  const incogWin = new BrowserWindow({
+    width: 1400, height: 900,
+    titleBarStyle: 'hidden', transparent: true, frame: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false, contextIsolation: true, sandbox: false, webviewTag: true
+    }
+  });
+  incogWin.loadFile('index.html');
+});
+const historyDir = path.join(app.getPath('home'), '.orion');
+const historyFile = path.join(historyDir, 'history.json');
+
+function ensureHistoryDir() {
+  if (!fs.existsSync(historyDir)) {
+    fs.mkdirSync(historyDir, { recursive: true });
+  }
+}
+
+function readHistory() {
+  ensureHistoryDir();
+  try {
+    if (fs.existsSync(historyFile)) {
+      const data = fs.readFileSync(historyFile, 'utf-8');
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('History read error:', e);
+  }
+  return [];
+}
+
+function writeHistory(entries) {
+  ensureHistoryDir();
+  try {
+    fs.writeFileSync(historyFile, JSON.stringify(entries, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('History write error:', e);
+  }
+}
+
+ipcMain.handle('history-read', () => {
+  return readHistory();
+});
+
+ipcMain.handle('history-write', (event, entry) => {
+  const history = readHistory();
+  const existing = history.find(h => h.url === entry.url);
+  if (existing) {
+    existing.timestamp = entry.timestamp;
+    existing.title = entry.title;
+    existing.visitCount = (existing.visitCount || 1) + 1;
+  } else {
+    entry.visitCount = 1;
+    history.push(entry);
+  }
+  writeHistory(history);
+  return history;
+});
+
+ipcMain.handle('history-clear', () => {
+  writeHistory([]);
+  return [];
+});

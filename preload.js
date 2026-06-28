@@ -22,6 +22,13 @@ const allowedChannels = [
   'toggle-adblock',
   'toggle-fullscreen',
   'set-fullscreen',
+  'update-bg-color',
+  'update-text-color',
+  'history-read',
+  'history-write',
+  'history-clear',
+  'new-window',
+  'new-incognito-window',
 ];
 
 // Function to check if a channel is allowed

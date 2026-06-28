@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="UTF-8"><title>Geçmiş - Orion</title>
+<style>
+:root{--bg:#0d0d0d;--text:#fff;--accent:#00a2e8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);padding:40px;max-width:800px;margin:auto}
+h1{font-weight:300;font-size:28px;margin-bottom:30px;display:flex;justify-content:space-between;align-items:center}
+.btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;transition:0.2s}
+.btn:hover{background:rgba(255,255,255,0.12)}
+.btn.danger{border-color:#ff5f56;color:#ff5f56;background:rgba(255,95,86,0.1)}
+.btn.danger:hover{background:rgba(255,95,86,0.2)}
+.day-group{margin-bottom:25px}
+.day-title{font-size:14px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.item{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:0.2s;text-decoration:none;color:inherit}
+.item:hover{background:rgba(255,255,255,0.05)}
+.item-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.item-info{flex:1;min-width:0}
+.item-title{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-url{font-size:11px;color:rgba(255,255,255,0.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-meta{font-size:11px;color:rgba(255,255,255,0.25);white-space:nowrap}
+.empty{text-align:center;padding:80px 0;color:rgba(255,255,255,0.3)}
+.empty-icon{font-size:48px;margin-bottom:15px}
+</style></head>
+<body>
+<h1>🕐 Geçmiş <button class="btn danger" id="clear-btn">🗑 Tümünü Temizle</button></h1>
+<div id="content"></div>
+<script>
+function groupByDate(entries){
+  const groups={};
+  const today=new Date(); today.setHours(0,0,0,0);
+  const yesterday=new Date(today); yesterday.setDate(yesterday.getDate()-1);
+  entries.forEach(e=>{
+    const d=new Date(e.timestamp);
+    const key=d.toDateString();
+    let label;
+    if(d>=today) label='Bugün';
+    else if(d>=yesterday) label='Dün';
+    else label=d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+    if(!groups[label]) groups[label]=[];
+    groups[label].push(e);
+  });
+  return groups;
+}
+function render(entries){
+  const el=document.getElementById('content');
+  if(!entries||entries.length===0){
+    el.innerHTML='<div class="empty"><div class="empty-icon">📭</div>Henüz geçmiş kaydı yok.</div>';
+    return;
+  }
+  const groups=groupByDate(entries);
+  let html='';
+  Object.keys(groups).forEach(label=>{
+    html+='<div class="day-group"><div class="day-title">'+label+'</div>';
+    groups[label].forEach(e=>{
+      const time=new Date(e.timestamp).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+      const icon=e.url.includes('github.com')?'🐙':e.url.includes('youtube.com')?'▶️':'🌐';
+      html+='<a class="item" href="'+e.url+'"><div class="item-icon">'+icon+'</div><div class="item-info"><div class="item-title">'+(e.title||e.url)+'</div><div class="item-url">'+e.url+'</div></div><div class="item-meta">'+time+(e.visitCount>1?' · ×'+e.visitCount:'')+'</div></a>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+// IPC ile geçmişi oku
+try{
+  const ipc=require('electron').ipcRenderer;
+  ipc.invoke('history-read').then(data=>render(data));
+  document.getElementById('clear-btn').addEventListener('click',()=>{
+    if(confirm('Tüm geçmiş silinsin mi?')){
+      ipc.invoke('history-clear').then(()=>render([]));
+    }
+  });
+}catch(e){
+  console.warn('IPC kullanılamıyor, demo veri gösteriliyor');
+  render([{url:'https://github.com',title:'GitHub',timestamp:Date.now()-3600000,visitCount:2},{url:'https://youtube.com',title:'YouTube',timestamp:Date.now()-7200000,visitCount:1}]);
+}
+</script>
+</body></html>
