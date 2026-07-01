@@ -3,4 +3,4 @@
 
 echo "Orion Browser başlatılıyor..."
 cd /home/teha/Documents/GitHub/orion-browser
-npx electron .
+npx electron . 2> >(grep -v "Fontconfig warning" >&2)

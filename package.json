@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
+    "start": "bash -c 'electron . 2> >(grep -v \"Fontconfig warning\" >&2)'",
     "dev": "concurrently \"electron .\" \"electron-wait-for-react-scripts\"",
     "watch": "electron-reload .",
     "pack": "electron-builder --dir",

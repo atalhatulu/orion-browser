@@ -18,27 +18,27 @@
 ## 🟡 Yapılacaklar (Öncelik Sırasına Göre)
 
 ### 1. 🕐 Geçmiş Sistemi
-- [ ] Ziyaret edilen URL'leri kaydetme
-- [ ] Geçmiş sayfası (tarihe göre gruplama)
-- [ ] Geçmiş temizleme
-- [ ] Menüden erişim
+- [x] Ziyaret edilen URL'leri kaydetme
+- [x] Geçmiş sayfası (tarihe göre gruplama)
+- [x] Geçmiş temizleme
+- [x] Menüden erişim
 
 ### 2. 📥 İndirme Yöneticisi (Gelişmiş)
-- [ ] İndirme hızı gösterimi (KB/s, MB/s)
-- [ ] Durdurma / Devam ettirme
-- [ ] İndirme geçmişi
-- [ ] İndirme bildirimleri
+- [x] İndirme hızı gösterimi (KB/s, MB/s)
+- [x] Durdurma / Devam ettirme
+- [x] İndirme geçmişi
+- [x] İndirme bildirimleri
 
 ### 3. 🔖 Yer İmleri (Bookmarks)
-- [ ] Yer imi ekleme (⭐ butonu)
-- [ ] Yer imi yönetimi sayfası
-- [ ] İçe/Dışa aktarma
+- [x] Yer imi ekleme (⭐ butonu)
+- [x] Yer imi yönetimi sayfası
+- [x] İçe/Dışa aktarma
 
 ### 4. 🔒 Gizlilik & Güvenlik
-- [ ] Gizli sekme (session partition) - kısmen var
-- [ ] Reklam engelleyici listesi yönetimi
-- [ ] Çerez yönetimi
-- [ ] Site izinleri (bildirim, konum, kamera)
+- [x] Gizli sekme (session partition) - tamamlandı
+- [x] Reklam engelleyici listesi yönetimi
+- [x] Çerez yönetimi
+- [x] Site izinleri (bildirim, konum, kamera)
 
 ### 5. 🎨 Tema & Görünüm
 - [ ] Koyu/Açık tema

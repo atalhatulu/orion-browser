@@ -16,33 +16,41 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ana sayfa her zaman hazır, ilk dot'u ekle
   // tabs aşağıda let ile tanımlanıyor (259), bu yüzden setTimeout ile erteliyoruz
   setTimeout(() => {
-      // İlk sekmeyi oluştur (asla 0 dot)
-      const now = new Date();
-      const st = now.toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
-      const sd = now.toLocaleDateString('tr-TR', {weekday:'long',month:'long',day:'numeric'});
-      const bg = localStorage.getItem('orion-bg-color') || '#0d0d0d';
-      const startHTML = `<html><head><style>body{margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:${bg};color:#fff;font-family:Inter,sans-serif;overflow:hidden}
-.t{font-size:72px;font-weight:300;letter-spacing:-2px;margin-bottom:5px}.dt{font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:40px;text-transform:uppercase;letter-spacing:1px}
-.srch{width:500px;max-width:85vw;padding:14px 20px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;text-align:center;box-sizing:border-box}
-.sw{display:flex;gap:20px;margin-top:40px;justify-content:center;flex-wrap:wrap}
-.sc{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;color:rgba(255,255,255,0.5);text-decoration:none;transition:0.3s;padding:10px}
-.sc:hover{color:rgba(255,255,255,0.8)}.si{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:20px}
-.sl{font-size:12px}
-</style></head><body>
-<div class="t">${st}</div><div class="dt">${sd}</div>
-<input class="srch" id="s" placeholder="Google'da arama yap..." autofocus>
-<div class="sw">
-<a class="sc" href="https://github.com"><div class="si">🐙</div><span class="sl">GitHub</span></a>
-<a class="sc" href="https://youtube.com"><div class="si">▶️</div><span class="sl">YouTube</span></a>
-<a class="sc" href="https://github.com/teha1/orion-browser"><div class="si">📦</div><span class="sl">Orion</span></a>
-</div>
-<script>
-document.getElementById('s').addEventListener('keydown',function(e){
-if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.google.com/search?q='+encodeURIComponent(e.target.value.trim());}
-});
-</script>
-</body></html>`;
-      createTab('data:text/html;charset=utf-8,' + encodeURIComponent(startHTML));
+      try {
+          const savedSession = localStorage.getItem('orion-saved-session');
+          if (savedSession) {
+              const urls = JSON.parse(savedSession);
+              if (urls && urls.length > 0) {
+                  const modal = document.getElementById('session-restore-modal');
+                  const desc = document.getElementById('session-restore-desc');
+                  const btnYes = document.getElementById('session-restore-yes');
+                  const btnNo = document.getElementById('session-restore-no');
+                  
+                  if (modal) {
+                      desc.innerText = `Tarayıcı beklenmedik şekilde kapandı veya açık sekmelerle kapatıldı. (${urls.length} açık sekme bulundu.)`;
+                      modal.style.display = 'flex';
+                      
+                      btnYes.onclick = () => {
+                          modal.style.display = 'none';
+                          localStorage.removeItem('orion-saved-session');
+                          urls.forEach(u => createTab(u));
+                      };
+                      
+                      btnNo.onclick = () => {
+                          modal.style.display = 'none';
+                          localStorage.removeItem('orion-saved-session');
+                          createTab('about:blank');
+                      };
+                  } else {
+                      createTab('about:blank');
+                  }
+              } else {
+                  createTab('about:blank');
+              }
+          } else {
+              createTab('about:blank');
+          }
+      } catch(e) {}
   }, 5);
 
   let originalZoneOrder = [];
@@ -129,21 +137,31 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       }
   }
 
+  // Incognito Check
+  const isIncognitoMode = new URLSearchParams(window.location.search).get('incognito') === 'true';
+  if (isIncognitoMode) {
+      document.body.classList.add('incognito-theme');
+      const badge = document.querySelector('.status-badge');
+      if (badge) badge.innerHTML = '🕵️ Gizli Sekme';
+  }
+
   // --- COLOR AND THEME LOGIC ---
   function hexToRgbStr(hex) {
       if(!hex) return '255, 255, 255';
       if(hex.startsWith('#')) hex = hex.slice(1);
-      var r = parseInt(hex.substr(0,2),16) || 255;
-      var g = parseInt(hex.substr(2,2),16) || 255;
-      var b = parseInt(hex.substr(4,2),16) || 255;
+      var r = parseInt(hex.substr(0,2),16); if(isNaN(r)) r = 255;
+      var g = parseInt(hex.substr(2,2),16); if(isNaN(g)) g = 255;
+      var b = parseInt(hex.substr(4,2),16); if(isNaN(b)) b = 255;
       return `${r}, ${g}, ${b}`;
   }
 
   function applyThemeColors(hexcolor, textcolor) {
-      document.documentElement.style.setProperty('--bg-color', hexcolor);
-      document.documentElement.style.setProperty('--text-color', textcolor);
-      const rgb = hexToRgbStr(textcolor);
-      document.documentElement.style.setProperty('--text-color-rgb', rgb);
+      document.body.style.setProperty('--bg-color', hexcolor);
+      document.body.style.setProperty('--text-color', textcolor);
+      const textRgb = hexToRgbStr(textcolor);
+      document.body.style.setProperty('--text-color-rgb', textRgb);
+      const bgRgb = hexToRgbStr(hexcolor);
+      document.body.style.setProperty('--bg-color-rgb', bgRgb);
 
       // Update theme in all webviews (if any)
       if (typeof tabs !== 'undefined') {
@@ -176,7 +194,7 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
   // ==========================================
   // PANEL DİZİLİM MANTIĞI (SÜRÜKLE BIRAK)
   // ==========================================
-  const zoneContainer = document.querySelector('.orion-browser');
+  const zoneContainer = document.querySelector('.browser-main-view');
   let draggedZone = null;
   let dragPlaceholder = null;
 
@@ -339,16 +357,6 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
   });
   zoneEls.forEach(el => zoneContainer.appendChild(el));
 
-  document.getElementById('magic-save-btn').addEventListener('click', () => {
-      document.body.classList.remove('edit-mode');
-      saveLayoutOrder();
-  });
-
-  document.getElementById('magic-cancel-btn').addEventListener('click', () => {
-      document.body.classList.remove('edit-mode');
-      window.location.reload();
-  });
-
   // ---- Rest of the original code (tab management, etc.) ----
   let tabs = [];
   let activeTabId = null;
@@ -374,8 +382,10 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       if (!url || url.startsWith('data:') || url === 'about:blank') {
           urlInput.value = '';
           urlInput.placeholder = "Google'da ara veya URL gir...";
+          if (homepageEl) homepageEl.classList.remove('hidden');
           return;
       }
+      if (homepageEl) homepageEl.classList.add('hidden');
       if (url.includes('settings.html')) {
           urlInput.value = '';
           urlInput.placeholder = '⚙️ Ayarlar';
@@ -396,6 +406,15 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
   urlInput.addEventListener('focus', () => { updateURLBar(); urlInput.select(); });
   urlInput.addEventListener('blur', () => { updateURLBar(); });
 
+  // --- OTURUM KURTARMA ---
+  function saveSession() {
+      const urls = tabs.map(t => {
+          try { return t.webviewEl.getURL(); }
+          catch(e) { return null; }
+      }).filter(u => u && !u.startsWith('data:') && u !== 'about:blank');
+      localStorage.setItem('orion-saved-session', JSON.stringify(urls));
+  }
+
   // Sekme sayısı 1 ise veya Anasayfa ise yandaki düğmeleri gizle
   function updateTabNavigation() {
       const prevBtn = document.getElementById('prev-tab-btn');
@@ -411,11 +430,11 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
 
   // NOKTALARI RENDER ET
   function updateDots() {
+      saveSession();
       if (!dotsContainer) return;
-      dotsContainer.innerHTML = '';
 
       if (tabs.length === 0) {
-          // Güvenlik: asla olmamalı ama olursa
+          dotsContainer.innerHTML = '';
           const hw = document.createElement('div');
           hw.className = 'dot-wrapper active';
           const hd = document.createElement('div');
@@ -426,46 +445,81 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
           return;
       }
 
+      // Mevcut wrapper'ları map'te tutarak DOM'u yeniden yaratmaktan kaçınalım
+      const existingWrappers = Array.from(dotsContainer.querySelectorAll('.dot-wrapper'));
+      const existingMap = new Map();
+      existingWrappers.forEach(w => {
+          if (w.dataset.tabId) existingMap.set(w.dataset.tabId, w);
+      });
+
+      dotsContainer.innerHTML = ''; // Temizleyip doğru sırayla ekleyeceğiz ama elementler aynı kalacak
+
       tabs.forEach((t) => {
-          const wrapper = document.createElement('div');
+          let wrapper = existingMap.get(t.id);
+          if (!wrapper) {
+              wrapper = document.createElement('div');
+              wrapper.dataset.tabId = t.id;
+              wrapper.className = 'dot-wrapper';
+
+              wrapper.addEventListener('dragstart', (e) => {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', t.id);
+                  setTimeout(() => wrapper.classList.add('is-dragging-dot'), 0);
+              });
+              wrapper.addEventListener('dragend', () => wrapper.classList.remove('is-dragging-dot'));
+              wrapper.addEventListener('dragenter', (e) => e.preventDefault());
+              wrapper.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+              wrapper.addEventListener('drop', (e) => {
+                  e.preventDefault(); wrapper.classList.remove('is-dragging-dot');
+                  const draggedId = e.dataTransfer.getData('text/plain');
+                  if (draggedId && draggedId !== t.id) {
+                      const di = tabs.findIndex(tab => tab.id === draggedId);
+                      const ti = tabs.findIndex(tab => tab.id === t.id);
+                      if (di !== -1 && ti !== -1) {
+                          const [d] = tabs.splice(di, 1);
+                          tabs.splice(ti, 0, d);
+                          updateDots();
+                      }
+                  }
+              });
+
+              const dot = document.createElement('div');
+              dot.className = 'tab-dot';
+              wrapper.appendChild(dot);
+
+              const closeBtn = document.createElement('div');
+              closeBtn.className = 'dot-close-btn';
+              closeBtn.innerHTML = '&times;';
+              closeBtn.title = 'Sekmeyi Kapat';
+              closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeTab(t.id); });
+              wrapper.appendChild(closeBtn);
+
+              // Tıklama event'i sadece noktada değil tüm wrapper üzerinde olmalı ki kolay tıklansın
+              wrapper.addEventListener('click', () => switchTab(t.id));
+          }
+
+          // Durumları güncelle
           wrapper.className = 'dot-wrapper' + (t.id === activeTabId ? ' active' : '');
           wrapper.draggable = tabs.length > 1;
+          const dot = wrapper.querySelector('.tab-dot');
+          if (dot) dot.title = t.title || 'Sekme';
 
-          wrapper.addEventListener('dragstart', (e) => {
-              e.dataTransfer.effectAllowed = 'move';
-              e.dataTransfer.setData('text/plain', t.id);
-              setTimeout(() => wrapper.classList.add('is-dragging-dot'), 0);
-          });
-          wrapper.addEventListener('dragend', () => wrapper.classList.remove('is-dragging-dot'));
-          wrapper.addEventListener('dragenter', (e) => e.preventDefault());
-          wrapper.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-          wrapper.addEventListener('drop', (e) => {
-              e.preventDefault(); wrapper.classList.remove('is-dragging-dot');
-              const draggedId = e.dataTransfer.getData('text/plain');
-              if (draggedId && draggedId !== t.id) {
-                  const di = tabs.findIndex(tab => tab.id === draggedId);
-                  const ti = tabs.findIndex(tab => tab.id === t.id);
-                  if (di !== -1 && ti !== -1) {
-                      const [d] = tabs.splice(di, 1);
-                      tabs.splice(ti, 0, d);
-                      updateDots();
+          const closeBtn = wrapper.querySelector('.dot-close-btn');
+          if (closeBtn) {
+              let isOnlyHomepage = false;
+              if (tabs.length === 1) {
+                  try {
+                      const u = t.webviewEl.getURL();
+                      if (!u || u === '' || u.startsWith('data:text/html')) {
+                          isOnlyHomepage = true;
+                      }
+                  } catch(e) {
+                      isOnlyHomepage = true; 
                   }
               }
-          });
+              closeBtn.style.display = isOnlyHomepage ? 'none' : 'flex';
+          }
 
-          const dot = document.createElement('div');
-          dot.className = 'tab-dot';
-          dot.title = t.title || 'Sekme';
-          wrapper.appendChild(dot);
-
-          const closeBtn = document.createElement('div');
-          closeBtn.className = 'dot-close-btn';
-          closeBtn.innerHTML = '&times;';
-          closeBtn.title = 'Sekmeyi Kapat';
-          closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeTab(t.id); });
-          wrapper.appendChild(closeBtn);
-
-          dot.addEventListener('click', () => switchTab(t.id));
           dotsContainer.appendChild(wrapper);
       });
 
@@ -485,33 +539,8 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
               if (activeTabId === id) switchTab(tabs[Math.max(0, index - 1)].id);
               else { updateDots(); updateTabNavigation(); }
           } else {
-              // Son sekme kapanınca yeni homepage sekmesi aç (asla 0 dot)
-              const now = new Date();
-              const t = now.toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
-              const d = now.toLocaleDateString('tr-TR', {weekday:'long',month:'long',day:'numeric'});
-              const bg = localStorage.getItem('orion-bg-color') || '#0d0d0d';
-              const html = `<html><head><style>body{margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:${bg};color:#fff;font-family:Inter,sans-serif;overflow:hidden}
-.time{font-size:72px;font-weight:300;letter-spacing:-2px;margin-bottom:5px}.date{font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:40px;text-transform:uppercase;letter-spacing:1px}
-.search{width:500px;max-width:85vw;padding:14px 20px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;text-align:center;box-sizing:border-box}
-.sc-wrap{display:flex;gap:20px;margin-top:40px;justify-content:center;flex-wrap:wrap}
-.sc{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;color:rgba(255,255,255,0.5);text-decoration:none;transition:0.3s;padding:10px}
-.sc:hover{color:rgba(255,255,255,0.8)}.sc-i{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:20px}
-.sc-l{font-size:12px}
-</style></head><body>
-<div class="time">${t}</div><div class="date">${d}</div>
-<input class="search" id="s" placeholder="Google'da arama yap..." autofocus>
-<div class="sc-wrap">
-<a class="sc" href="https://github.com"><div class="sc-i">🐙</div><span class="sc-l">GitHub</span></a>
-<a class="sc" href="https://youtube.com"><div class="sc-i">▶️</div><span class="sc-l">YouTube</span></a>
-<a class="sc" href="https://github.com/teha1/orion-browser"><div class="sc-i">📦</div><span class="sc-l">Orion</span></a>
-</div>
-<script>
-document.getElementById('s').addEventListener('keydown',function(e){
-if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.google.com/search?q='+encodeURIComponent(e.target.value.trim());}
-});
-</script>
-</body></html>`;
-              createTab('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+              // Son sekme kapanınca tarayıcıyı tamamen kapat
+              ipc.send('window-close');
           }
       }
   }
@@ -559,6 +588,12 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       const webviewEl = document.createElement('webview');
       webviewEl.id = `wv-${id}`;
       webviewEl.setAttribute('src', url);
+      
+      const isIncognito = new URLSearchParams(window.location.search).get('incognito') === 'true';
+      if (isIncognito) {
+          webviewEl.setAttribute('partition', 'incognito_win');
+      }
+      
       webviewEl.setAttribute('webpreferences', 'contextIsolation=yes, sandbox=no, webSecurity=no');
       webviewEl.setAttribute('allowpopups', '');
       webviewEl.addEventListener('did-finish-load', () => {
@@ -575,11 +610,51 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       webviewEl.addEventListener('page-title-updated', (e) => { const t = tabs.find(t=>t.id===id); if(t) t.title=e.title; if(activeTabId===id) updateURLBar(); updateDots(); });
       webviewEl.addEventListener('console-message', (e) => {
           if(e.message && e.message.startsWith('ORION_IPC:')) {
-              const p = e.message.split(':'); const ch = p[1]; const d = p.slice(2).join(':');
-              if (ch === 'update-bg-color') { const t=localStorage.getItem('orion-text-color')||'#ffffff'; applyThemeColors(d,t); localStorage.setItem('orion-bg-color',d); }
-              else if (ch === 'update-text-color') { const b=localStorage.getItem('orion-bg-color')||'#0d0d0d'; applyThemeColors(b,d); localStorage.setItem('orion-text-color',d); }
-              else if (ch === 'update-radius') { document.documentElement.style.setProperty('--surf-radius',`${d}px`); localStorage.setItem('orion-surf-radius',d); }
+              const p = e.message.split(':'); const action = p[1]; const data = p.slice(2).join(':');
+              if (action === 'update-bg-color') { const t=localStorage.getItem('orion-text-color')||'#ffffff'; applyThemeColors(data,t); localStorage.setItem('orion-bg-color',data); }
+              else if (action === 'update-text-color') { const b=localStorage.getItem('orion-bg-color')||'#0d0d0d'; applyThemeColors(b,data); localStorage.setItem('orion-text-color',data); }
+              else if (action === 'update-radius') { document.documentElement.style.setProperty('--surf-radius',`${data}px`); localStorage.setItem('orion-surf-radius',data); }
+              else if (action === 'update-theme-mode') { 
+                  localStorage.setItem('orion-theme-mode', data); 
+                  if(data==='light') {
+                      document.body.classList.add('light-theme'); 
+                      localStorage.setItem('orion-bg-color', '#f2f2f2');
+                      localStorage.setItem('orion-text-color', '#1a1a1a');
+                      applyThemeColors('#f2f2f2', '#1a1a1a');
+                  } else {
+                      document.body.classList.remove('light-theme'); 
+                      localStorage.setItem('orion-bg-color', '#0d0d0d');
+                      localStorage.setItem('orion-text-color', '#ffffff');
+                      applyThemeColors('#0d0d0d', '#ffffff');
+                  }
+              }
+              else if (ch === 'update-wallpaper') { 
+                  localStorage.setItem('orion-wallpaper', d); 
+                  if(d) document.body.style.backgroundImage = `url('${d}')`;
+                  else document.body.style.backgroundImage = 'none';
+              }
+              else if (ch === 'update-custom-css') { 
+                  try {
+                      const css = atob(d);
+                      localStorage.setItem('orion-custom-css', css); 
+                      let styleEl = document.getElementById('orion-custom-css-style');
+                      if(!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'orion-custom-css-style'; document.head.appendChild(styleEl); }
+                      styleEl.textContent = css;
+                      alert('Özel CSS uygulandı!');
+                  } catch(e) {}
+              }
               else if (ch === 'toggle-magic-mode') { if(d==='true') document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode'); }
+              else if (ch === 'clear-cookies') { ipc.invoke('clear-cookies').then(()=>alert('Çerezler temizlendi!')); }
+              else if (ch === 'save-adblock') { 
+                  localStorage.setItem('orion-adblock-list', d); 
+                  try { const arr = JSON.parse(d); ipc.send('update-adblock-list', arr); } catch(e){}
+                  alert('Reklam engelleyici listesi güncellendi!'); 
+              }
+              else if (ch === 'save-permissions') { 
+                  localStorage.setItem('orion-site-permissions', d); 
+                  try { const p = JSON.parse(d); ipc.send('update-permissions', p); } catch(e){}
+                  alert('Site izinleri kaydedildi!'); 
+              }
           }
       });
       wrapper.appendChild(webviewEl);
@@ -595,7 +670,20 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       if (!searchInput) return;
       searchInput.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' && e.target.value.trim()) {
-              createTab('https://www.google.com/search?q=' + encodeURIComponent(e.target.value.trim()));
+              const query = 'https://www.google.com/search?q=' + encodeURIComponent(e.target.value.trim());
+              const activeTab = tabs.find(t => t.id === activeTabId);
+              if (activeTab && activeTab.webviewEl) {
+                  try {
+                      const url = activeTab.webviewEl.getURL();
+                      if (!url || url.startsWith('data:') || url === 'about:blank') {
+                          activeTab.webviewEl.loadURL(query);
+                      } else {
+                          createTab(query);
+                      }
+                  } catch(e) { createTab(query); }
+              } else {
+                  createTab(query);
+              }
               e.target.value = '';
           }
       });
@@ -608,10 +696,27 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
           link.addEventListener('click', (e) => {
               e.preventDefault();
               const href = link.getAttribute('href');
+              let targetUrl = href;
               if (href && href !== '#' && !href.startsWith('javascript:')) {
-                  createTab(href);
+                  targetUrl = href;
               } else if (link.id === 'hp-settings-link') {
-                  createTab(utils.getAssetPath('settings.html'));
+                  targetUrl = utils.getAssetPath('settings.html');
+              } else {
+                  return;
+              }
+              
+              const activeTab = tabs.find(t => t.id === activeTabId);
+              if (activeTab && activeTab.webviewEl) {
+                  try {
+                      const url = activeTab.webviewEl.getURL();
+                      if (!url || url.startsWith('data:') || url === 'about:blank') {
+                          activeTab.webviewEl.loadURL(targetUrl);
+                      } else {
+                          createTab(targetUrl);
+                      }
+                  } catch(e) { createTab(targetUrl); }
+              } else {
+                  createTab(targetUrl);
               }
           });
       });
@@ -644,6 +749,12 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       const webviewEl = document.createElement('webview');
       webviewEl.id = `wv-${id}`;
       webviewEl.setAttribute('src', url);
+      
+      const isIncognito = new URLSearchParams(window.location.search).get('incognito') === 'true';
+      if (isIncognito) {
+          webviewEl.setAttribute('partition', 'incognito_win');
+      }
+      
       webviewEl.setAttribute('webpreferences', 'contextIsolation=yes, sandbox=no, webSecurity=no');
       webviewEl.setAttribute('allowpopups', '');
 
@@ -653,9 +764,15 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
               const bg = localStorage.getItem('orion-bg-color') || '#0d0d0d';
               const txt = localStorage.getItem('orion-text-color') || '#ffffff';
               const rgb = hexToRgbStr(txt);
-              webviewEl.executeJavaScript('document.documentElement.style.setProperty("--text-color","'+txt+'");document.documentElement.style.setProperty("--text-color-rgb","'+rgb+'");document.body.style.color="'+txt+'";document.body.style.background="transparent";if(document.querySelector(".sidebar"))document.querySelector(".sidebar").style.background="transparent"');
+              const theme = localStorage.getItem('orion-theme-mode') || 'dark';
+              const themeClass = theme === 'light' ? 'document.body.classList.add("light-theme");' : 'document.body.classList.remove("light-theme");';
+              webviewEl.executeJavaScript(themeClass + 'document.documentElement.style.setProperty("--text-color","'+txt+'");document.documentElement.style.setProperty("--text-color-rgb","'+rgb+'");document.body.style.color="'+txt+'";document.body.style.background="transparent";if(document.querySelector(".sidebar"))document.querySelector(".sidebar").style.background="transparent"');
           }
       });
+      
+      webviewEl.addEventListener('crashed', () => { alert('Olamaz! Bu sayfa çöktü. Lütfen sayfayı yenileyin.'); });
+      webviewEl.addEventListener('plugin-crashed', () => { alert('Eklenti çöktü!'); });
+      webviewEl.addEventListener('unresponsive', () => { if(confirm('Bu sayfa yanıt vermiyor. Kapatılsın mı?')) closeTab(id); });
 
       webviewEl.addEventListener('did-navigate', () => { updateURLBar(); updateDots(); updateNavButtons(); });
       webviewEl.addEventListener('context-menu', (e) => { e.preventDefault(); ipc.send('show-context-menu', {mediaType:e.params.mediaType||'',srcURL:e.params.srcURL||'',linkURL:e.params.linkURL||''}); });
@@ -671,7 +788,47 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
               if (ch === 'update-bg-color') { const t=localStorage.getItem('orion-text-color')||'#ffffff'; applyThemeColors(d,t); localStorage.setItem('orion-bg-color',d); }
               else if (ch === 'update-text-color') { const b=localStorage.getItem('orion-bg-color')||'#0d0d0d'; applyThemeColors(b,d); localStorage.setItem('orion-text-color',d); }
               else if (ch === 'update-radius') { document.documentElement.style.setProperty('--surf-radius',`${d}px`); localStorage.setItem('orion-surf-radius',d); }
+              else if (ch === 'update-theme-mode') { 
+                  localStorage.setItem('orion-theme-mode', d); 
+                  if(d==='light') {
+                      document.body.classList.add('light-theme'); 
+                      localStorage.setItem('orion-bg-color', '#f2f2f2');
+                      localStorage.setItem('orion-text-color', '#1a1a1a');
+                      applyThemeColors('#f2f2f2', '#1a1a1a');
+                  } else {
+                      document.body.classList.remove('light-theme'); 
+                      localStorage.setItem('orion-bg-color', '#0d0d0d');
+                      localStorage.setItem('orion-text-color', '#ffffff');
+                      applyThemeColors('#0d0d0d', '#ffffff');
+                  }
+              }
+              else if (ch === 'update-wallpaper') { 
+                  localStorage.setItem('orion-wallpaper', d); 
+                  if(d) document.body.style.backgroundImage = `url('${d}')`;
+                  else document.body.style.backgroundImage = 'none';
+              }
+              else if (ch === 'update-custom-css') { 
+                  try {
+                      const css = atob(d);
+                      localStorage.setItem('orion-custom-css', css); 
+                      let styleEl = document.getElementById('orion-custom-css-style');
+                      if(!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'orion-custom-css-style'; document.head.appendChild(styleEl); }
+                      styleEl.textContent = css;
+                      alert('Özel CSS uygulandı!');
+                  } catch(e) {}
+              }
               else if (ch === 'toggle-magic-mode') { if(d==='true') document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode'); }
+              else if (ch === 'clear-cookies') { ipc.invoke('clear-cookies').then(()=>alert('Çerezler temizlendi!')); }
+              else if (ch === 'save-adblock') { 
+                  localStorage.setItem('orion-adblock-list', d); 
+                  try { const arr = JSON.parse(d); ipc.send('update-adblock-list', arr); } catch(e){}
+                  alert('Reklam engelleyici listesi güncellendi!'); 
+              }
+              else if (ch === 'save-permissions') { 
+                  localStorage.setItem('orion-site-permissions', d); 
+                  try { const p = JSON.parse(d); ipc.send('update-permissions', p); } catch(e){}
+                  alert('Site izinleri kaydedildi!'); 
+              }
           }
       });
 
@@ -708,25 +865,49 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
   // Navigasyon (İleri/Geri) Butonları Durumunu Güncelleme
   function updateNavButtons() {
       const activeTab = tabs.find(t => t.id === activeTabId);
-      const backBtn = document.getElementById('nav-back');
-      const fwdBtn = document.getElementById('nav-fwd');
-
+      const navBack = document.getElementById('nav-back');
+      const navFwd = document.getElementById('nav-fwd');
       if (!activeTab || !activeTab.webviewEl) {
-          if (backBtn) { backBtn.style.opacity = '0.3'; backBtn.style.pointerEvents = 'none'; }
-          if (fwdBtn) { fwdBtn.style.opacity = '0.3'; fwdBtn.style.pointerEvents = 'none'; }
+          navBack.style.opacity = '0.3'; navBack.style.pointerEvents = 'none';
+          navFwd.style.opacity = '0.3'; navFwd.style.pointerEvents = 'none';
           return;
       }
       try {
           const canGoBack = activeTab.webviewEl.canGoBack();
           const canGoForward = activeTab.webviewEl.canGoForward();
-
-          backBtn.style.opacity = canGoBack ? '1' : '0.3';
-          backBtn.style.pointerEvents = canGoBack ? 'auto' : 'none';
-
-          fwdBtn.style.opacity = canGoForward ? '1' : '0.3';
-          fwdBtn.style.pointerEvents = canGoForward ? 'auto' : 'none';
+          navBack.style.opacity = canGoBack ? '1' : '0.3';
+          navBack.style.pointerEvents = canGoBack ? 'auto' : 'none';
+          navFwd.style.opacity = canGoForward ? '1' : '0.3';
+          navFwd.style.pointerEvents = canGoForward ? 'auto' : 'none';
       } catch(e) {}
   }
+
+  // --- KENAR ÇUBUĞU (SIDEBAR) ---
+  const sidebar = document.getElementById('browser-sidebar');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  if (sidebarToggle && sidebar) {
+      const isSbOpen = localStorage.getItem('orion-sidebar') === 'true';
+      if (isSbOpen) sidebar.style.display = 'flex';
+      
+      sidebarToggle.addEventListener('click', () => {
+          if (sidebar.style.display === 'none') {
+              sidebar.style.display = 'flex';
+              localStorage.setItem('orion-sidebar', 'true');
+          } else {
+              sidebar.style.display = 'none';
+              localStorage.setItem('orion-sidebar', 'false');
+          }
+      });
+  }
+  document.querySelectorAll('.sb-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'bookmarks') createTab(utils.getAssetPath('bookmarks.html'));
+          if(action === 'history') createTab(utils.getAssetPath('history.html'));
+          if(action === 'downloads') createTab(utils.getAssetPath('downloads.html'));
+          if(action === 'settings') createTab(utils.getAssetPath('settings.html'));
+      });
+  });
 
   document.getElementById('nav-back').addEventListener('click', () => {
       const tab = tabs.find(t => t.id === activeTabId);
@@ -742,81 +923,13 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       const tab = tabs.find(t => t.id === activeTabId);
       if(tab) tab.webviewEl.reload();
   });
-
-  // Yer imi butonu
-  const bookmarkBtn = document.getElementById('bookmark-btn');
-  function updateBookmarkBtn() {
-      const tab = tabs.find(t => t.id === activeTabId);
-      if (!tab || !tab.webviewEl) { bookmarkBtn.textContent = '☆'; return; }
-      try {
-          const url = tab.webviewEl.getURL();
-          if (!url || url.startsWith('data:')) { bookmarkBtn.textContent = '☆'; return; }
-          const bookmarks = getBookmarks();
-          bookmarks.find(b => b.url === url) ? (bookmarkBtn.textContent = '★') : (bookmarkBtn.textContent = '☆');
-      } catch(e) { bookmarkBtn.textContent = '☆'; }
-  }
-  if (bookmarkBtn) {
-      bookmarkBtn.addEventListener('click', () => {
-          const tab = tabs.find(t => t.id === activeTabId);
-          if (!tab || !tab.webviewEl) return;
-          try {
-              const url = tab.webviewEl.getURL();
-              if (!url || url.startsWith('data:')) return;
-              const title = tab.title || url;
-              let bookmarks = getBookmarks();
-              const existing = bookmarks.findIndex(b => b.url === url);
-              if (existing !== -1) { bookmarks.splice(existing, 1); } 
-              else { bookmarks.push({ url, title, icon: '🌐' }); }
-              localStorage.setItem('orion-bookmarks', JSON.stringify(bookmarks));
-              updateBookmarkBtn();
-          } catch(e) {}
-      });
-  }
   function getBookmarks() {
       try { return JSON.parse(localStorage.getItem('orion-bookmarks')) || []; }
       catch(e) { return []; }
   }
 
   document.getElementById('new-tab-btn').addEventListener('click', () => {
-      // Yeni sekme: homepage içeriği ile webview oluştur
-      const now = new Date();
-      const time = now.toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
-      const date = now.toLocaleDateString('tr-TR', {weekday:'long',month:'long',day:'numeric'});
-      const bgColor = localStorage.getItem('orion-bg-color') || '#0d0d0d';
-      const hpHTML = `<html><head><style>body{margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:${bgColor};color:#fff;font-family:Inter,sans-serif;overflow:hidden}
-        .time{font-size:72px;font-weight:300;letter-spacing:-2px;margin-bottom:5px}
-        .date{font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:40px;text-transform:uppercase;letter-spacing:1px}
-        .search{width:500px;max-width:85vw;padding:14px 20px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;text-align:center;box-sizing:border-box}
-        .shortcuts{display:flex;gap:20px;margin-top:40px;justify-content:center;flex-wrap:wrap}
-        .sc{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;color:rgba(255,255,255,0.5);text-decoration:none;transition:0.3s;padding:10px}
-        .sc:hover{color:rgba(255,255,255,0.8)}
-        .sc-icon{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:20px}
-        .sc-label{font-size:12px}
-      </style></head><body>
-        <div class="time">${time}</div>
-        <div class="date">${date}</div>
-        <input class="search" id="hp-search-inpage" placeholder="Google'da arama yap..." autofocus>
-        <div class="shortcuts" id="hp-shortcuts-inpage">
-          <a class="sc" href="https://github.com"><div class="sc-icon">🐙</div><span class="sc-label">GitHub</span></a>
-          <a class="sc" href="https://youtube.com"><div class="sc-icon">▶️</div><span class="sc-label">YouTube</span></a>
-          <a class="sc" href="file-settings"><div class="sc-icon">⚙️</div><span class="sc-label">Ayarlar</span></a>
-        </div>
-        <script>
-          document.getElementById('hp-search-inpage').addEventListener('keydown',function(e){
-            if(e.key==='Enter'&&e.target.value.trim()){
-              window.location.href='https://www.google.com/search?q='+encodeURIComponent(e.target.value.trim());
-            }
-          });
-          document.querySelectorAll('#hp-shortcuts-inpage a').forEach(function(a){
-            a.addEventListener('click',function(e){
-              if(this.getAttribute('href')==='file-settings'){window.location.href='file://${utils.getAssetPath('settings.html').replace(/'/g, "\\'")}';}
-            });
-          });
-        <\/script>
-      </body></html>`;
-      
-      // data URI'deki script tag'ini düzgün kapatmak için replace
-      createTab('data:text/html;charset=utf-8,' + encodeURIComponent(hpHTML));
+      createTab('about:blank');
   });
 
   // Hamburger menü
@@ -845,18 +958,13 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
               } else if (action === 'appearance') {
                   createTab(utils.getAssetPath('settings.html'));
               } else if (action === 'downloads') {
-                  openDownloadsPanel();
+                  createTab(utils.getAssetPath('downloads.html'));
               } else if (action === 'history') {
                   createTab(utils.getAssetPath('history.html'));
               } else if (action === 'about') {
                   createTabAbout();
               } else if (action === 'bookmarks') {
-                  const bookmarks = getBookmarks();
-                  if (bookmarks.length === 0) { createTab('about:blank'); return; }
-                  let html = '<html><body style="background:#0d0d0d;color:white;font-family:sans-serif;padding:40px"><h1 style="font-weight:300">🔖 Yer İmleri</h1><div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">';
-                  bookmarks.forEach(b => { html += '<a href="'+b.url+'" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,0.03);border-radius:8px;text-decoration:none;color:rgba(255,255,255,0.8);transition:0.2s"><span style="font-size:20px">'+b.icon+'</span><span>'+b.title+'</span><span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:auto">'+b.url+'</span></a>'; });
-                  html += '</div></body></html>';
-                  createTab('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+                  createTab(utils.getAssetPath('bookmarks.html'));
               } else if (action === 'profile') {
                   createTab(utils.getAssetPath('settings.html'));
               } else if (action === 'new-window') {
@@ -940,6 +1048,11 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
           e.preventDefault();
           const activeTab = tabs.find(t => t.id === activeTabId);
           if (activeTab) closeTab(activeTab.id);
+      }
+      // Ctrl+S: Zen Modu (Üst ve Alt barları gizle)
+      if (e.key.toLowerCase() === 's' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          document.body.classList.toggle('zen-mode');
       }
       // Ctrl+Shift+D: Debug modu (element sınırlarını göster)
       if (e.key === 'D' && e.ctrlKey && e.shiftKey) {
@@ -1044,7 +1157,7 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
 
   // === ARKAPLAN RENGİ ===
   function applyHomepageBg() {
-      const c = localStorage.getItem('orion-bg-color') || '';
+      const c = localStorage.getItem('orion-homepage-bg-color') || '#0d0d0d';
       document.querySelectorAll('.homepage-container').forEach(el => {
           el.style.background = c || 'var(--bg-color)';
       });
@@ -1055,12 +1168,11 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
   setTimeout(() => {
       const c = document.querySelector('#homepage-container .hp-shortcuts');
       if (c) renderShortcuts(c, null);
-      window.addEventListener('storage', (e) => { if (e.key === 'orion-bg-color') applyHomepageBg(); });
+      window.addEventListener('storage', (e) => { if (e.key === 'orion-homepage-bg-color') applyHomepageBg(); });
   }, 100);
 
   // applyThemeColors'ı arkaplan rengi ile güçlendir
-  const _origApplyTC = applyThemeColors;
-  applyThemeColors = function(h, t) { _origApplyTC(h, t); applyHomepageBg(); };
+  // Ana sayfa ve ayarlar teması ayrıldığı için bu kancaya artık gerek yok.
 
   // Ana sayfa özelleştirme sidebar
   setTimeout(() => {
@@ -1074,11 +1186,16 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
           if (closeBtn) closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
       }
       if (bgPicker) {
-          bgPicker.value = localStorage.getItem('orion-bg-color') || '#0d0d0d';
+          bgPicker.value = localStorage.getItem('orion-homepage-bg-color') || '#0d0d0d';
           bgPicker.addEventListener('input', (e) => {
-              localStorage.setItem('orion-bg-color', e.target.value);
+              localStorage.setItem('orion-homepage-bg-color', e.target.value);
               const c = e.target.value;
               document.querySelectorAll('.homepage-container').forEach(el => el.style.background = c);
+              tabs.forEach(t => {
+                  if (t.webviewEl && t.webviewEl.getURL().startsWith('data:text/html')) {
+                      t.webviewEl.executeJavaScript(`document.body.style.background="${c}"`).catch(()=>{});
+                  }
+              });
           });
       }
       if (settingsBtn) settingsBtn.addEventListener('click', () => { sidebar.classList.remove('open'); createTab(utils.getAssetPath('settings.html')); });
@@ -1090,5 +1207,45 @@ if(e.key==='Enter'&&e.target.value.trim()){window.location.href='https://www.goo
       if (st) st.addEventListener('change', (e) => { const el=document.querySelector('#homepage-container .hp-search-box'); if(el) el.style.display=e.target.checked?'':'none'; });
       if (sct) sct.addEventListener('change', (e) => { const el=document.getElementById('hp-shortcuts-root'); if(el) el.style.display=e.target.checked?'':'none'; });
   }, 150);
+
+  // --- BAŞLANGIÇTA GİZLİLİK VE TEMA YÜKLEME ---
+  try {
+      // Gizlilik
+      const savedAdblock = localStorage.getItem('orion-adblock-list');
+      if (savedAdblock) ipc.send('update-adblock-list', JSON.parse(savedAdblock));
+      const savedPerms = localStorage.getItem('orion-site-permissions');
+      if (savedPerms) ipc.send('update-permissions', JSON.parse(savedPerms));
+
+      // Tema ve CSS
+      const mode = localStorage.getItem('orion-theme-mode') || 'dark';
+      if(mode === 'light') document.body.classList.add('light-theme');
+      else document.body.classList.remove('light-theme');
+
+      const wp = localStorage.getItem('orion-wallpaper');
+      if(wp) {
+          document.body.style.backgroundImage = `url('${wp}')`;
+          document.body.style.backgroundSize = 'cover';
+          document.body.style.backgroundPosition = 'center';
+      } else {
+          document.body.style.backgroundImage = 'none';
+      }
+
+      const css = localStorage.getItem('orion-custom-css');
+      if(css) {
+          let styleEl = document.createElement('style');
+          styleEl.id = 'orion-custom-css-style';
+          styleEl.textContent = css;
+          document.head.appendChild(styleEl);
+      }
+  } catch(e) { console.error(e); }
+
+  // --- BELLEK GÖSTERGESİ ---
+  const ramBadge = document.getElementById('ram-usage');
+  if (ramBadge) {
+      ipc.on('memory-usage', (memBytes) => {
+          const mb = (memBytes / 1024).toFixed(1);
+          ramBadge.innerText = `⚡ ${mb} MB`;
+      });
+  }
 
   }); // DOMContentLoaded

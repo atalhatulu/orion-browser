@@ -29,6 +29,7 @@ const allowedChannels = [
   'history-clear',
   'new-window',
   'new-incognito-window',
+  'memory-usage'
 ];
 
 // Function to check if a channel is allowed

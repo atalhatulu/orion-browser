@@ -32,37 +32,129 @@ function createWindow() {
       if (win.webContents) win.webContents.send('window-state', 'unmaximized');
   });
 
-  const adBlockList = [
+  let adBlockList = [
       '*://*.doubleclick.net/*', '*://*.google-analytics.com/*', '*://*.googlesyndication.com/*',
       '*://*.facebook.net/*', '*://*.adnxs.com/*', '*://*.adsystem.com/*',
       '*://*.taboola.com/*', '*://*.outbrain.com/*'
   ];
 
-  session.defaultSession.webRequest.onBeforeRequest({ urls: adBlockList }, (details, callback) => {
-      if (!adblockEnabled) return callback({ cancel: false }); 
-      
-      blockedCount++;
-      if (win && win.webContents) {
-          win.webContents.send('tracker-blocked', blockedCount);
+  function applyAdBlocker() {
+      session.defaultSession.webRequest.onBeforeRequest({ urls: adBlockList }, (details, callback) => {
+          if (!adblockEnabled) return callback({ cancel: false }); 
+          
+          blockedCount++;
+          if (win && win.webContents) {
+              win.webContents.send('tracker-blocked', blockedCount);
+          }
+          callback({ cancel: true }); 
+      });
+  }
+  applyAdBlocker();
+  
+  ipcMain.on('update-adblock-list', (e, newList) => {
+      if(Array.isArray(newList)) {
+          adBlockList = newList;
+          applyAdBlocker();
       }
-      callback({ cancel: true }); 
+  });
+
+  ipcMain.handle('clear-cookies', async () => {
+      await session.defaultSession.clearStorageData({storages: ['cookies']});
+      return true;
+  });
+
+  let sitePermissions = { media: 'ask', location: 'ask', notifications: 'ask' };
+  ipcMain.on('update-permissions', (e, perms) => {
+      sitePermissions = Object.assign(sitePermissions, perms);
+  });
+  
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+      if (permission === 'media') {
+          if (sitePermissions.media === 'allow') return callback(true);
+          if (sitePermissions.media === 'deny') return callback(false);
+      }
+      if (permission === 'geolocation') {
+          if (sitePermissions.location === 'allow') return callback(true);
+          if (sitePermissions.location === 'deny') return callback(false);
+      }
+      if (permission === 'notifications') {
+          if (sitePermissions.notifications === 'allow') return callback(true);
+          if (sitePermissions.notifications === 'deny') return callback(false);
+      }
+      // Varsayılan olarak izin ver veya reddet (ask için dialog gereklidir, basitlik için false)
+      callback(false);
   });
 
   win.webContents.session.on('will-download', (event, item, webContents) => {
-      win.webContents.send('download-started', { filename: item.getFilename() });
+      const id = Date.now().toString() + '-' + Math.floor(Math.random() * 1000);
+      activeDownloadsItems[id] = item;
+      
+      const fileUrl = item.getURL();
+      const filename = item.getFilename();
+      const savePath = item.getSavePath();
+      const totalBytes = item.getTotalBytes();
+      
+      win.webContents.send('download-started', { id, filename, url: fileUrl, totalBytes });
 
       item.on('updated', (event, state) => {
           if (state === 'progressing') {
               const progress = Math.round((item.getReceivedBytes() / item.getTotalBytes()) * 100);
-              win.webContents.send('download-progress', { filename: item.getFilename(), progress, receivedBytes: item.getReceivedBytes(), totalBytes: item.getTotalBytes() });
+              win.webContents.send('download-progress', { 
+                  id, 
+                  filename, 
+                  progress, 
+                  receivedBytes: item.getReceivedBytes(), 
+                  totalBytes: item.getTotalBytes(),
+                  state: item.isPaused() ? 'paused' : 'progressing'
+              });
           }
       });
 
       item.once('done', (event, state) => {
-          win.webContents.send('download-done', { filename: item.getFilename(), state });
+          delete activeDownloadsItems[id];
+          win.webContents.send('download-done', { id, filename, state });
+          
+          // İndirme geçmişine ekle
+          if (state === 'completed') {
+              const dlHistory = readDownloadsHistory();
+              dlHistory.push({ id, filename, url: fileUrl, path: item.getSavePath(), size: item.getTotalBytes(), timestamp: Date.now() });
+              writeDownloadsHistory(dlHistory);
+          }
       });
   });
 }
+
+// Download History Management
+const downloadsHistoryFile = path.join(app.getPath('userData'), 'orion_downloads.json');
+function readDownloadsHistory() {
+  try {
+    if (fs.existsSync(downloadsHistoryFile)) {
+      return JSON.parse(fs.readFileSync(downloadsHistoryFile, 'utf-8'));
+    }
+  } catch (e) {}
+  return [];
+}
+function writeDownloadsHistory(data) {
+  try {
+    fs.writeFileSync(downloadsHistoryFile, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {}
+}
+
+const activeDownloadsItems = {};
+
+ipcMain.handle('downloads-read', () => readDownloadsHistory());
+ipcMain.handle('downloads-clear', () => { writeDownloadsHistory([]); return true; });
+
+// Download Actions
+ipcMain.on('download-pause', (e, id) => {
+    if (activeDownloadsItems[id]) activeDownloadsItems[id].pause();
+});
+ipcMain.on('download-resume', (e, id) => {
+    if (activeDownloadsItems[id]) activeDownloadsItems[id].resume();
+});
+ipcMain.on('download-cancel', (e, id) => {
+    if (activeDownloadsItems[id]) activeDownloadsItems[id].cancel();
+});
 
 app.whenReady().then(createWindow);
 
@@ -71,6 +163,17 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+setInterval(() => {
+    if (win && !win.isDestroyed() && win.webContents) {
+        try {
+            const metrics = app.getAppMetrics();
+            let totalMem = 0;
+            metrics.forEach(m => { totalMem += (m.memory.workingSetSize || 0); });
+            win.webContents.send('memory-usage', totalMem);
+        } catch(e) {}
+    }
+}, 2000);
 
 ipcMain.on('toggle-adblock', (e, state) => { adblockEnabled = state; });
 
@@ -99,15 +202,30 @@ ipcMain.on('show-context-menu', (event, params) => {
     menu.popup({ window: win });
 });
 
-ipcMain.on('window-minimize', () => win.minimize());
-ipcMain.on('window-maximize', () => {
-  if (win.isMaximized()) win.unmaximize();
-  else win.maximize();
+ipcMain.on('window-minimize', (event) => {
+    const w = BrowserWindow.fromWebContents(event.sender);
+    if (w) w.minimize();
 });
-ipcMain.on('window-close', () => win.close());
-ipcMain.on('toggle-fullscreen', () => { win.setFullScreen(!win.isFullScreen()); });
+ipcMain.on('window-maximize', (event) => {
+    const w = BrowserWindow.fromWebContents(event.sender);
+    if (w) {
+        if (w.isMaximized()) w.unmaximize();
+        else w.maximize();
+    }
+});
+ipcMain.on('window-close', (event) => {
+    const w = BrowserWindow.fromWebContents(event.sender);
+    if (w) w.close();
+});
+ipcMain.on('toggle-fullscreen', (event) => { 
+    const w = BrowserWindow.fromWebContents(event.sender);
+    if (w) w.setFullScreen(!w.isFullScreen()); 
+});
 // Yeni eklenen explicit fullscreen kontrolü
-ipcMain.on('set-fullscreen', (e, state) => { win.setFullScreen(state); });
+ipcMain.on('set-fullscreen', (event, state) => { 
+    const w = BrowserWindow.fromWebContents(event.sender);
+    if (w) w.setFullScreen(state); 
+});
 
 // Yeni pencere
 ipcMain.on('new-window', () => {
@@ -131,10 +249,11 @@ ipcMain.on('new-incognito-window', () => {
     titleBarStyle: 'hidden', transparent: true, frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false, contextIsolation: true, sandbox: false, webviewTag: true
+      nodeIntegration: false, contextIsolation: true, sandbox: false, webviewTag: true,
+      partition: 'incognito_win'
     }
   });
-  incogWin.loadFile('index.html');
+  incogWin.loadFile('index.html', { query: { incognito: 'true' } });
 });
 const historyDir = path.join(app.getPath('home'), '.orion');
 const historyFile = path.join(historyDir, 'history.json');

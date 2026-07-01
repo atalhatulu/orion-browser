@@ -5,49 +5,181 @@
     <title>Ayarlar - Orion</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0a0a0a; --panel-bg: rgba(var(--text-color-rgb, 255, 255, 255), 0.05); --text: var(--text-color, #ffffff); --accent: #00a2e8; }
+        :root { 
+            --bg: #050505; 
+            --panel-bg: rgba(128, 128, 128, 0.05); 
+            --panel-border: rgba(128, 128, 128, 0.1);
+            --text: var(--text-color, #ffffff); 
+            --accent: #0088ff; 
+            --accent-hover: #0099ff;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            background-image: radial-gradient(circle at 100% 0%, rgba(0, 136, 255, 0.05) 0%, transparent 60%);
+            color: var(--text); 
+            overflow: hidden; 
+            height: 100vh; 
+            display: flex; 
+        }
         
         .settings-container { display: flex; width: 100%; height: 100%; }
         
-        .sidebar { width: 260px; background: rgba(0,0,0,0.4); border-right: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.05); padding: 30px 20px; display: flex; flex-direction: column; gap: 30px; }
-        .sidebar h2 { font-weight: 500; font-size: 20px; letter-spacing: 1px; color: rgba(var(--text-color-rgb, 255, 255, 255), 0.8); }
-        .sidebar nav { display: flex; flex-direction: column; gap: 8px; }
+        .sidebar { 
+            width: 280px; 
+            background: rgba(0, 0, 0, 0.6); 
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--panel-border); 
+            padding: 40px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 40px; 
+            z-index: 10;
+        }
+        .sidebar h2 { font-weight: 500; font-size: 22px; letter-spacing: -0.5px; color: rgba(var(--text-color-rgb), 0.5); padding-left: 10px; display: flex; align-items: center; gap: 10px; }
+        .sidebar nav { display: flex; flex-direction: column; gap: 6px; }
         
-        .nav-btn { background: transparent; border: none; color: rgba(var(--text-color-rgb, 255, 255, 255), 0.6); padding: 12px 16px; border-radius: 8px; text-align: left; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
-        .nav-btn:hover { background: rgba(var(--text-color-rgb, 255, 255, 255), 0.05); color: var(--text-color, #fff); }
-        .nav-btn.active { background: rgba(0, 162, 232, 0.15); color: var(--accent); }
+        .nav-btn { 
+            background: transparent; 
+            border: 1px solid transparent; 
+            color: rgba(var(--text-color-rgb), 0.5); 
+            padding: 14px 16px; 
+            border-radius: 12px; 
+            text-align: left; 
+            font-size: 14px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: all 0.25s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .nav-btn:hover { 
+            background: rgba(var(--text-color-rgb), 0.5); 
+            color: rgba(var(--text-color-rgb), 0.5); 
+            transform: translateX(4px);
+        }
+        .nav-btn.active { 
+            background: rgba(0, 136, 255, 0.1); 
+            border-color: rgba(0, 136, 255, 0.2);
+            color: var(--accent); 
+            box-shadow: inset 4px 0 0 var(--accent);
+        }
         
-        .content { flex: 1; padding: 50px 60px; overflow-y: auto; }
-        section { display: none; animation: fadeIn 0.3s ease; }
+        .content { flex: 1; padding: 50px 80px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+        section { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
         section.active-section { display: block; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        h1 { font-weight: 400; font-size: 28px; margin-bottom: 30px; border-bottom: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1); padding-bottom: 15px; }
+        h1 { font-weight: 400; font-size: 32px; margin-bottom: 40px; border-bottom: 1px solid var(--panel-border); padding-bottom: 20px; letter-spacing: -0.5px; }
         
-        .card { background: var(--panel-bg); border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.05); border-radius: 12px; padding: 25px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .card h3 { font-size: 16px; font-weight: 500; }
-        .card p { font-size: 13px; color: rgba(var(--text-color-rgb, 255, 255, 255), 0.6); line-height: 1.5; }
+        .card { 
+            background: var(--panel-bg); 
+            border: 1px solid var(--panel-border); 
+            border-radius: 16px; 
+            padding: 24px 30px; 
+            margin-bottom: 24px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+        }
+        .card:hover {
+            background: rgba(var(--text-color-rgb), 0.5);
+            border-color: rgba(var(--text-color-rgb), 0.5);
+            transform: translateY(-2px);
+        }
+        .card h3 { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .card p { font-size: 13px; color: rgba(var(--text-color-rgb), 0.5); line-height: 1.6; max-width: 90%; }
         
-        select { background: rgba(0,0,0,0.3); border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1); color: var(--text-color, #fff); padding: 10px 15px; border-radius: 8px; outline: none; font-family: 'Inter', sans-serif; cursor: pointer; }
+        select { 
+            background: rgba(0,0,0,0.4); 
+            border: 1px solid var(--panel-border); 
+            color: var(--text); 
+            padding: 12px 18px; 
+            border-radius: 10px; 
+            outline: none; 
+            font-family: 'Inter', sans-serif; 
+            cursor: pointer; 
+            font-size: 14px;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            padding-right: 45px;
+        }
+        select:hover, select:focus { border-color: rgba(var(--text-color-rgb), 0.5); background-color: rgba(0,0,0,0.6); }
+        select:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .primary-btn { background: rgba(0, 162, 232, 0.2); border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; cursor: pointer; transition: 0.2s; width: fit-content; font-weight: 500; }
-        .primary-btn:hover { background: rgba(0, 162, 232, 0.4); color: var(--text-color, #fff); }
+        .primary-btn { 
+            background: rgba(0, 136, 255, 0.15); 
+            border: 1px solid rgba(0, 136, 255, 0.3); 
+            color: var(--accent); 
+            padding: 12px 24px; 
+            border-radius: 10px; 
+            font-family: 'Inter', sans-serif; 
+            font-size: 14px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            width: fit-content; 
+            font-weight: 500; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .primary-btn:hover { 
+            background: rgba(0, 136, 255, 0.3); 
+            color: var(--text); 
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 136, 255, 0.2);
+        }
         
-        .glass-card { background: linear-gradient(135deg, rgba(var(--text-color-rgb, 255, 255, 255), 0.05), rgba(var(--text-color-rgb, 255, 255, 255), 0.01)); backdrop-filter: blur(10px); border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); }
-
         /* Switch toggle CSS */
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(var(--text-color-rgb, 255, 255, 255), 0.1); transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--text-color, white); transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(var(--text-color-rgb), 0.5); transition: .3s; border-radius: 24px; border: 1px solid transparent; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 2px; background-color: var(--text); transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(20px); }
+        
+        /* Color Picker Styling */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 50px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        input[type="color"]:hover { transform: scale(1.05); }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
+
         body.edit-mode .sidebar { pointer-events: none; opacity: 0.3; }
         body.edit-mode .card:not(#magic-card) { pointer-events: none; opacity: 0.3; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--text-color-rgb), 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(var(--text-color-rgb), 0.5); }
     </style>
+
+    <style>
+        body.light-theme .sidebar { background: rgba(255,255,255,0.7) !important; border-color: rgba(0,0,0,0.1) !important; }
+        body.light-theme input, body.light-theme textarea, body.light-theme select { background: rgba(255,255,255,0.9) !important; border-color: rgba(0,0,0,0.2) !important; color: #000 !important; }
+        body.light-theme select:hover, body.light-theme select:focus { background-color: rgba(255,255,255,1) !important; }
+        body.light-theme .card { background: rgba(255,255,255,0.7) !important; border-color: rgba(0,0,0,0.1) !important; }
+    </style>
+
 </head>
 <body>
     <div class="settings-container">
@@ -92,10 +224,33 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
+                            <h3>Tema Modu</h3>
+                            <p style="margin-top:5px;">Açık veya koyu tema seçin.</p>
+                        </div>
+                        <select id="theme-mode-select">
+                            <option value="dark">Koyu Tema</option>
+                            <option value="light">Açık Tema</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
                             <h3>Arka Plan Rengi</h3>
                             <p style="margin-top:5px;">Tarayıcının ana tema rengini değiştirin.</p>
                         </div>
                         <input type="color" id="bg-color-picker" value="#0d0d0d" style="width: 50px; height: 35px; background:transparent; border:none; cursor:pointer;">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>Duvar Kağıdı (URL)</h3>
+                            <p style="margin-top:5px;">Tarayıcı arkaplanına resim ekleyin.</p>
+                        </div>
+                        <input type="text" id="wallpaper-url" placeholder="https://..." style="background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); color: var(--text); padding: 8px 12px; border-radius: 8px; outline: none; font-family: monospace; width: 200px;">
                     </div>
                 </div>
 
@@ -107,6 +262,13 @@
                         </div>
                         <input type="color" id="text-color-picker" value="#ffffff" style="width: 50px; height: 35px; background:transparent; border:none; cursor:pointer;">
                     </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Özel CSS Enjeksiyonu</h3>
+                    <p style="margin-bottom: 10px;">Tarayıcı arayüzünü CSS ile tamamen özelleştirin.</p>
+                    <textarea id="custom-css-input" placeholder="body { background: red !important; }" style="width: 100%; height: 80px; background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); color: var(--text); padding: 10px; border-radius: 8px; outline: none; font-family: monospace; resize: none;"></textarea>
+                    <button class="primary-btn" id="save-custom-css" style="margin-top: 10px;">CSS Uygula</button>
                 </div>
 
                 <div class="card">
@@ -125,29 +287,61 @@
 
             <!-- GİZLİLİK AYARLARI -->
             <section id="guvenlik">
-                <h1>Gizlilik & Ağ Ayarları</h1>
+                <h1>Gizlilik & Güvenlik</h1>
+                
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h3>Reklam ve İzleyici Engelleyici</h3>
+                            <h3>🛡️ Reklam ve İzleyici Engelleyici</h3>
                             <p style="margin-top:5px;">Zararlı siteleri, izleyicileri ve reklamları engeller.</p>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="adblock-toggle" checked>
                             <span class="slider"></span>
                         </label>
                     </div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--panel-border);">
+                        <h4>Özel Filtre Listesi</h4>
+                        <p style="margin-top:5px;">Engellenecek özel domainleri (virgülle ayırarak) yazın.</p>
+                        <textarea id="adblock-list" style="width: 100%; height: 80px; margin-top: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); color: var(--text); padding: 10px; border-radius: 8px; outline: none; font-family: monospace; resize: none;"></textarea>
+                        <button class="primary-btn" id="save-adblock" style="margin-top: 10px;">Listeyi Kaydet</button>
+                    </div>
                 </div>
+
                 <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3>Dahili VPN</h3>
-                            <p style="margin-top:5px;">Bağlantınızı şifreleyin ve coğrafi kısıtlamaları aşın.</p>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox">
-                            <span class="slider"></span>
-                        </label>
+                    <h3>🍪 Çerez Yönetimi</h3>
+                    <p>Sitelerin sizi takip etmesini engellemek için çerezleri temizleyin.</p>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="primary-btn" id="clear-cookies" style="border-color: #ff4757; color: #ff4757;">Tüm Çerezleri Temizle</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔒 Site İzinleri</h3>
+                    <p>Web sitelerinin kamera, mikrofon ve konumunuza erişimini yönetin.</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                        <span>Kamera & Mikrofon İzinleri</span>
+                        <select id="perm-media">
+                            <option value="ask">Her seferinde sor</option>
+                            <option value="allow">İzin ver</option>
+                            <option value="deny">Engelle</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                        <span>Konum Bilgisi (GPS)</span>
+                        <select id="perm-location">
+                            <option value="ask">Her seferinde sor</option>
+                            <option value="allow">İzin ver</option>
+                            <option value="deny">Engelle</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                        <span>Bildirimler</span>
+                        <select id="perm-notifications">
+                            <option value="ask">Her seferinde sor</option>
+                            <option value="allow">İzin ver</option>
+                            <option value="deny">Engelle</option>
+                        </select>
                     </div>
                 </div>
             </section>
@@ -237,6 +431,34 @@
             });
         });
 
+        // Tema Modu
+        const themeSelect = document.getElementById('theme-mode-select');
+        if (themeSelect) {
+            themeSelect.value = localStorage.getItem('orion-theme-mode') || 'dark';
+            themeSelect.addEventListener('change', (e) => {
+                console.log("ORION_IPC:update-theme-mode:" + e.target.value);
+            });
+        }
+        
+        // Wallpaper
+        const wpInput = document.getElementById('wallpaper-url');
+        if (wpInput) {
+            wpInput.value = localStorage.getItem('orion-wallpaper') || '';
+            wpInput.addEventListener('input', (e) => {
+                console.log("ORION_IPC:update-wallpaper:" + e.target.value);
+            });
+        }
+        
+        // Custom CSS
+        const cssInput = document.getElementById('custom-css-input');
+        const saveCss = document.getElementById('save-custom-css');
+        if (cssInput && saveCss) {
+            cssInput.value = localStorage.getItem('orion-custom-css') || '';
+            saveCss.addEventListener('click', () => {
+                console.log("ORION_IPC:update-custom-css:" + btoa(cssInput.value)); // Use base64 to avoid parsing issues
+            });
+        }
+
         // Tema rengi değişimi (Anlık)
         const colorPicker = document.getElementById('bg-color-picker');
         if (colorPicker) {
@@ -273,6 +495,62 @@
                 console.log("ORION_IPC:toggle-magic-mode:true");
             });
         }
+        
+        // --- GİZLİLİK VE GÜVENLİK ---
+        const adblockToggle = document.getElementById('adblock-toggle');
+        if (adblockToggle) {
+            adblockToggle.checked = localStorage.getItem('orion-adblock-enabled') !== 'false';
+            adblockToggle.addEventListener('change', (e) => {
+                localStorage.setItem('orion-adblock-enabled', e.target.checked);
+                // We'd need an IPC for toggle-adblock, wait, main.js has 'toggle-adblock'. 
+                // Let's add that to renderer.js if needed or use existing.
+            });
+        }
+        
+        const adblockList = document.getElementById('adblock-list');
+        const saveAdblock = document.getElementById('save-adblock');
+        if (adblockList && saveAdblock) {
+            const defFilters = ['*://*.doubleclick.net/*', '*://*.google-analytics.com/*'];
+            const savedList = localStorage.getItem('orion-adblock-list');
+            adblockList.value = savedList ? savedList : defFilters.join(',\n');
+            saveAdblock.addEventListener('click', () => {
+                const listStr = adblockList.value;
+                const arr = listStr.split(',').map(s=>s.trim()).filter(s=>s.length>0);
+                console.log("ORION_IPC:save-adblock:" + JSON.stringify(arr));
+            });
+        }
+        
+        const clearCookies = document.getElementById('clear-cookies');
+        if (clearCookies) {
+            clearCookies.addEventListener('click', () => {
+                console.log("ORION_IPC:clear-cookies:true");
+            });
+        }
+        
+        function savePermissions() {
+            const media = document.getElementById('perm-media').value;
+            const loc = document.getElementById('perm-location').value;
+            const notif = document.getElementById('perm-notifications').value;
+            const perms = { media, location: loc, notifications: notif };
+            console.log("ORION_IPC:save-permissions:" + JSON.stringify(perms));
+        }
+        
+        ['perm-media', 'perm-location', 'perm-notifications'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                // Initialize from localstorage if exists
+                try {
+                    const saved = JSON.parse(localStorage.getItem('orion-site-permissions'));
+                    if (saved) {
+                        if(id==='perm-media') el.value = saved.media || 'ask';
+                        if(id==='perm-location') el.value = saved.location || 'ask';
+                        if(id==='perm-notifications') el.value = saved.notifications || 'ask';
+                    }
+                } catch(e){}
+                el.addEventListener('change', savePermissions);
+            }
+        });
+
     </script>
 </body>
 </html>

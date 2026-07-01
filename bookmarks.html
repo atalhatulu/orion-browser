@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Yer İmleri - Orion</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050505; 
+  --text: #ffffff; 
+  --accent: #0088ff;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-border: rgba(255, 255, 255, 0.05);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  background-image: radial-gradient(circle at 0% 0%, rgba(0, 136, 255, 0.05) 0%, transparent 70%);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 50px 20px;
+}
+.container { max-width: 900px; margin: 0 auto; }
+h1 {
+  font-weight: 400; font-size: 32px; margin-bottom: 40px;
+  display: flex; justify-content: space-between; align-items: center; letter-spacing: -0.5px;
+}
+.actions { display: flex; gap: 12px; }
+.btn {
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer;
+  font-size: 14px; font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);
+}
+.btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.btn.primary { background: rgba(0, 136, 255, 0.15); border-color: rgba(0, 136, 255, 0.3); color: var(--accent); }
+.btn.primary:hover { background: rgba(0, 136, 255, 0.25); border-color: var(--accent); color: #fff; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.bookmark-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  padding: 20px; border-radius: 16px; display: flex; flex-direction: column;
+  transition: all 0.3s ease; animation: fadeUp 0.5s ease backwards; text-decoration: none; color: #fff;
+  position: relative; overflow: hidden;
+}
+.bookmark-card:hover {
+  background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.bookmark-icon {
+  width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 255, 255, 0.05);
+  display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px;
+}
+.bookmark-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bookmark-url { font-size: 13px; color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.delete-btn {
+  position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255, 71, 87, 0.1); color: #ff4757; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s;
+}
+.bookmark-card:hover .delete-btn { opacity: 1; }
+.delete-btn:hover { background: #ff4757; color: #fff; }
+
+.empty { text-align: center; padding: 100px 0; color: rgba(255, 255, 255, 0.4); font-size: 15px; grid-column: 1 / -1; }
+.empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; filter: grayscale(100%); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    <span>🔖 Yer İmleri</span>
+    <div class="actions">
+      <button class="btn" id="export-btn">📥 Dışa Aktar</button>
+      <button class="btn primary" id="import-btn">📤 İçe Aktar</button>
+      <input type="file" id="import-file" accept=".json" style="display:none">
+    </div>
+  </h1>
+  <div class="grid" id="content"></div>
+</div>
+
+<script>
+function getBookmarks() {
+  try { return JSON.parse(localStorage.getItem('orion-bookmarks')) || []; }
+  catch(e) { return []; }
+}
+function setBookmarks(bm) {
+  localStorage.setItem('orion-bookmarks', JSON.stringify(bm));
+}
+
+function getFavicon(url) {
+  try {
+    const u = new URL(url);
+    if(u.hostname.includes('youtube.com')) return '▶️';
+    if(u.hostname.includes('github.com')) return '🐙';
+    if(u.hostname.includes('google.com')) return '🔍';
+    if(u.hostname.includes('twitter.com') || u.hostname.includes('x.com')) return '🐦';
+    if(u.hostname.includes('reddit.com')) return '👽';
+  } catch(e) {}
+  return '🌐';
+}
+
+function render() {
+  const el = document.getElementById('content');
+  const bookmarks = getBookmarks();
+  
+  if(bookmarks.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📂</div>Henüz hiç yer imi eklemediniz.</div>';
+    return;
+  }
+  
+  let html = '';
+  let delay = 0;
+  bookmarks.forEach((b, index) => {
+    const icon = b.icon !== '🌐' ? b.icon : getFavicon(b.url);
+    html += `
+      <div class="bookmark-card" style="animation-delay: ${delay}s" href="${b.url}">
+        <button class="delete-btn" data-index="${index}" title="Sil">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </button>
+        <div class="bookmark-icon">${icon}</div>
+        <div class="bookmark-title">${b.title}</div>
+        <div class="bookmark-url">${b.url}</div>
+      </div>
+    `;
+    delay += 0.05;
+  });
+  el.innerHTML = html;
+  
+  document.querySelectorAll('.bookmark-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if(e.target.closest('.delete-btn')) return; // Sil butonuna basıldıysa gitme
+      window.location.href = card.getAttribute('href');
+    });
+  });
+  
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = btn.getAttribute('data-index');
+      const bm = getBookmarks();
+      bm.splice(idx, 1);
+      setBookmarks(bm);
+      render();
+    });
+  });
+}
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const data = JSON.stringify(getBookmarks(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'orion-bookmarks.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('import-btn').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if(Array.isArray(imported)) {
+        const existing = getBookmarks();
+        // Sadece URL'si yeni olanları ekle
+        imported.forEach(imp => {
+          if(!existing.find(b => b.url === imp.url)) existing.push(imp);
+        });
+        setBookmarks(existing);
+        render();
+        alert('Yer imleri başarıyla içe aktarıldı!');
+      }
+    } catch(err) {
+      alert('Geçersiz yer imi dosyası!');
+    }
+  };
+  reader.readAsText(file);
+});
+
+render();
+</script>
+</body>
+</html>

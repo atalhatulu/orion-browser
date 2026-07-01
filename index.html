@@ -13,142 +13,157 @@
   <div id="drag-region"></div>
 
   <div class="orion-browser">
-      
-      <!-- ÜST BAR (LINK BAR) -->
-      <div class="floating-header zone-container" id="zone-header">
-          <div class="zone-controls">
-              <div class="drag-handle" title="Sürüklemek için tut">⠿</div>
+      <!-- SOL KENAR ÇUBUĞU (SIDEBAR) -->
+      <div class="browser-sidebar" id="browser-sidebar" style="display: none;">
+          <div class="sidebar-top">
+              <button class="sb-btn" data-action="bookmarks" title="Yer İmleri">🔖</button>
+              <button class="sb-btn" data-action="history" title="Geçmiş">🕐</button>
+              <button class="sb-btn" data-action="downloads" title="İndirmeler">📥</button>
           </div>
-          <div class="header-left">
-              <span id="nav-back" title="Geri" class="icon-btn" style="opacity: 0.3; pointer-events: none;">&larr;</span>
-              <span id="nav-fwd" title="İleri" class="icon-btn" style="opacity: 0.3; pointer-events: none;">&rarr;</span>
-          </div>
-
-          <div class="header-center">
-              <span id="bookmark-btn" title="Yer İmi Ekle" class="icon-btn">☆</span>
-              <span id="nav-reload" title="Yenile" class="icon-btn" style="margin-right: 5px;">↻</span>
-              <input type="text" id="url-input" placeholder="Google'da ara veya URL gir..." spellcheck="false" autofocus />
-              <span id="new-tab-btn" title="Yeni Sekme" class="icon-btn" style="margin-left: 5px;">+</span>
-          </div>
-
-          <div class="header-right">
-              <div class="menu-container">
-                  <span id="menu-btn" title="Menü" class="icon-btn">☰</span>
-                  <div id="dropdown-menu" class="dropdown-menu">
-                      <div class="menu-item" data-action="settings">⚙️ Ayarlar</div>
-                      <div class="menu-item" data-action="profile">👤 Profil</div>
-                      <div class="menu-divider"></div>
-                      <div class="menu-item" data-action="new-window">🪟 Yeni Pencere</div>
-                      <div class="menu-item" data-action="incognito">🕶️ Gizli Sekme</div>
-                      <div class="menu-divider"></div>
-                      <div class="menu-item" data-action="extensions">🧩 Eklentiler</div>
-                      <div class="menu-item" data-action="appearance">🎨 Görünüm</div>
-                      <div class="menu-item" data-action="find">🔍 Sayfada Bul</div>
-                      <div class="menu-divider"></div>
-                      <div class="menu-item" data-action="print">🖨️ Yazdır</div>
-                      <div class="menu-item" data-action="downloads">📥 İndirilenler</div>
-                      <div class="menu-item" data-action="history">🕐 Geçmiş</div>
-                      <div class="menu-item" data-action="bookmarks">🔖 Yer İmleri</div>
-                      <div class="menu-divider"></div>
-                      <div class="menu-item" data-action="about">ℹ️ Hakkında</div>
-                  </div>
-              </div>
-              <span class="header-divider"></span>
-              <div id="window-controls" class="orion-dots">
-                  <button class="win-btn minimize" id="min-btn">▽</button>
-                  <button class="win-btn maximize" id="max-btn">◻</button>
-                  <button class="win-btn close" id="close-btn">✕</button>
-              </div>
+          <div class="sidebar-bottom">
+              <button class="sb-btn" data-action="settings" title="Ayarlar">⚙️</button>
           </div>
       </div>
 
-      <!-- ANA SÖRF ALANI -->
-      <div class="surfing-area zone-container" id="zone-surf">
-          <div class="zone-controls" style="display: none !important;"></div>
-          
-          <!-- Ana Sayfa (yedek) -->
-          <div id="homepage-container" class="homepage-container hidden">
-              <div class="hp-time" id="hp-clock">00:00</div>
-              <div class="hp-date" id="hp-date">Yükleniyor...</div>
-              <div class="hp-search-box">
-                  <input type="text" class="hp-search-input" id="hp-search" placeholder="Google'da arama yap..." autofocus>
+      <div class="browser-main-view" style="display: flex; flex-direction: column; flex: 1; height: 100%; position: relative;">
+          <!-- ÜST BAR (LINK BAR) -->
+          <div class="floating-header zone-container" id="zone-header">
+              <div class="zone-controls">
+                  <div class="drag-handle" title="Sürüklemek için tut">⠿</div>
               </div>
-              <div class="hp-shortcuts" id="hp-shortcuts-root">
+              <div class="header-left">
+                  <span id="nav-back" title="Geri" class="icon-btn" style="opacity: 0.3; pointer-events: none;">&larr;</span>
+                  <span id="nav-fwd" title="İleri" class="icon-btn" style="opacity: 0.3; pointer-events: none;">&rarr;</span>
               </div>
-          </div>
-          <div class="hp-customize-btn" id="hp-customize-btn" title="Ana Sayfayı Özelleştir">✏️</div>
-          
-          <!-- Ana Sayfa Özelleştirme Sidebar -->
-          <div class="hp-sidebar" id="hp-sidebar">
-              <div class="hp-sidebar-header">
-                  <span>🎨 Ana Sayfa</span>
-                  <span class="hp-sidebar-close" id="hp-sidebar-close">✕</span>
-              </div>
-              <div class="hp-sidebar-body">
-                  <div class="hp-sidebar-group">
-                      <label>Arkaplan Rengi</label>
-                      <input type="color" id="hp-bg-picker" value="#0d0d0d">
-                  </div>
-                  <div class="hp-sidebar-group">
-                      <label>Kısayol Sırası</label>
-                      <select id="hp-rows-select">
-                          <option value="1">1 Sıra</option>
-                          <option value="2" selected>2 Sıra</option>
-                          <option value="3">3 Sıra</option>
-                      </select>
-                  </div>
-                  <div class="hp-sidebar-group">
-                      <label>Widget'lar</label>
-                      <div class="hp-sidebar-toggle"><span>Saat</span><input type="checkbox" id="hp-widget-clock" checked></div>
-                      <div class="hp-sidebar-toggle"><span>Arama Çubuğu</span><input type="checkbox" id="hp-widget-search" checked></div>
-                      <div class="hp-sidebar-toggle"><span>Kısayollar</span><input type="checkbox" id="hp-widget-shortcuts" checked></div>
-                  </div>
-              </div>
-              <div class="hp-sidebar-footer">
-                  <button id="hp-sidebar-settings" class="hp-sidebar-btn">⚙️ Diğer Ayarlar</button>
-              </div>
-          </div>
-          
-          <div id="content-area"></div>
-          
-          <!-- Webview Tıklama Kalkanı -->
-          <div id="webview-click-shield"></div>
-          
-          <!-- DÜZENLEME MODU PENCERESİ (ORTADA) -->
-          <div id="magic-overlay-panel" class="magic-overlay-panel">
-              <h3 style="margin: 0; color: white; font-weight: 500;">✨ Düzenleme Modu</h3>
-              <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.6); text-align: center; max-width: 250px;">
-                  Panelleri sağdaki oklarla yukarı veya aşağı taşıyın. İşiniz bitince kaydedin.
-              </p>
-              <div style="display: flex; gap: 10px; margin-top: 5px;">
-                  <button id="magic-save-btn" class="magic-btn save">Kaydet</button>
-                  <button id="magic-cancel-btn" class="magic-btn cancel">İptal Et</button>
-              </div>
-          </div>
-          
-          <button id="prev-tab-btn" class="tab-switch-btn left-switch" title="Önceki Sekme" style="display: none;">&lang;</button>
-          <button id="next-tab-btn" class="tab-switch-btn right-switch" title="Sonraki Sekme" style="display: none;">&rang;</button>
-      </div>
 
-      <!-- ALT DURUM ÇUBUĞU (INFO BAR) -->
-      <div class="bottom-bar zone-container" id="zone-bottom">
-          <div class="zone-controls">
-              <div class="drag-handle" title="Sürüklemek için tut">⠿</div>
+              <div class="header-center">
+                  <span id="sidebar-toggle" title="Kenar Çubuğu" class="icon-btn" style="display: none;">🗂️</span>
+                  <span id="nav-reload" title="Yenile" class="icon-btn" style="margin-right: 5px;">↻</span>
+                  <input type="text" id="url-input" placeholder="Google'da ara veya URL gir..." spellcheck="false" autofocus />
+                  <span id="new-tab-btn" title="Yeni Sekme" class="icon-btn" style="margin-left: 5px;">+</span>
+              </div>
+
+              <div class="header-right">
+                  <div class="menu-container">
+                      <span id="menu-btn" title="Menü" class="icon-btn">☰</span>
+                      <div id="dropdown-menu" class="dropdown-menu">
+                          <div class="menu-item" data-action="settings">⚙️ Ayarlar</div>
+                          <div class="menu-item" data-action="profile">👤 Profil</div>
+                          <div class="menu-divider"></div>
+                          <div class="menu-item" data-action="new-window">🪟 Yeni Pencere</div>
+                          <div class="menu-item" data-action="incognito">🕶️ Gizli Sekme</div>
+                          <div class="menu-divider"></div>
+                          <div class="menu-item" data-action="extensions">🧩 Eklentiler</div>
+                          <div class="menu-item" data-action="appearance">🎨 Görünüm</div>
+                          <div class="menu-item" data-action="find">🔍 Sayfada Bul</div>
+                          <div class="menu-divider"></div>
+                          <div class="menu-item" data-action="print">🖨️ Yazdır</div>
+                          <div class="menu-item" data-action="downloads">📥 İndirilenler</div>
+                          <div class="menu-item" data-action="history">🕐 Geçmiş</div>
+                          <div class="menu-item" data-action="bookmarks">🔖 Yer İmleri</div>
+                          <div class="menu-divider"></div>
+                          <div class="menu-item" data-action="about">ℹ️ Hakkında</div>
+                      </div>
+                  </div>
+                  <span class="header-divider"></span>
+                  <div id="window-controls" class="orion-dots">
+                      <button class="win-btn minimize" id="min-btn">▽</button>
+                      <button class="win-btn maximize" id="max-btn">◻</button>
+                      <button class="win-btn close" id="close-btn">✕</button>
+                  </div>
+              </div>
           </div>
-          <div class="bottom-left">
-              <span class="status-badge glass-badge">Orion v1.0.0</span>
-              <span class="dot-sep">&bull;</span>
-              <span id="tracker-count" class="toggleable-status" title="Reklam Engelleyici">🛡️ 0 Engellendi</span>
-              <span class="dot-sep">&bull;</span>
-              <span id="vpn-toggle" class="toggleable-status">🌍 VPN Kapalı</span>
+
+          <!-- ANA SÖRF ALANI -->
+          <div class="surfing-area zone-container" id="zone-surf">
+              <div class="zone-controls" style="display: none !important;"></div>
+              
+              <!-- Ana Sayfa (yedek) -->
+              <div id="homepage-container" class="homepage-container hidden">
+                  <div class="hp-time" id="hp-clock">00:00</div>
+                  <div class="hp-date" id="hp-date">Yükleniyor...</div>
+                  <div class="hp-search-box">
+                      <input type="text" class="hp-search-input" id="hp-search" placeholder="Google'da arama yap..." autofocus>
+                  </div>
+                  <div class="hp-shortcuts" id="hp-shortcuts-root">
+                  </div>
+
+                  <div class="hp-customize-btn" id="hp-customize-btn" title="Ana Sayfayı Özelleştir">✏️</div>
+                  <!-- Ana Sayfa Özelleştirme Sidebar -->
+                  <div class="hp-sidebar" id="hp-sidebar">
+                      <div class="hp-sidebar-header">
+                          <span>🎨 Ana Sayfa</span>
+                          <span class="hp-sidebar-close" id="hp-sidebar-close">✕</span>
+                      </div>
+                      <div class="hp-sidebar-body">
+                          <div class="hp-sidebar-group">
+                              <label>Ana Sayfa Rengi</label>
+                              <input type="color" id="hp-bg-picker" value="#0d0d0d">
+                          </div>
+                          <div class="hp-sidebar-group">
+                              <label>Kısayol Sırası</label>
+                              <select id="hp-rows-select">
+                                  <option value="1">1 Sıra</option>
+                                  <option value="2" selected>2 Sıra</option>
+                                  <option value="3">3 Sıra</option>
+                              </select>
+                          </div>
+                          <div class="hp-sidebar-group">
+                              <label>Widget'lar</label>
+                              <div class="hp-sidebar-toggle"><span>Saat</span><input type="checkbox" id="hp-widget-clock" checked></div>
+                              <div class="hp-sidebar-toggle"><span>Arama Çubuğu</span><input type="checkbox" id="hp-widget-search" checked></div>
+                              <div class="hp-sidebar-toggle"><span>Kısayollar</span><input type="checkbox" id="hp-widget-shortcuts" checked></div>
+                          </div>
+                      </div>
+                      <div class="hp-sidebar-footer">
+                          <button id="hp-sidebar-settings" class="hp-sidebar-btn">⚙️ Diğer Ayarlar</button>
+                      </div>
+                  </div>
+              </div>
+              
+              <div id="content-area"></div>
+              
+              <!-- Webview Tıklama Kalkanı -->
+              <div id="webview-click-shield"></div>
+
+              <!-- OTURUM KURTARMA PENCERESİ -->
+              <div id="session-restore-modal" class="magic-overlay-panel" style="display: none; z-index: 100000; flex-direction: column; gap: 15px; width: 320px; padding: 25px;">
+                  <div style="font-size: 32px; text-align: center;">🔄</div>
+                  <h3 style="margin: 0; color: var(--text-color, white); font-weight: 600; text-align: center; font-size: 18px;">Önceki Oturumu Geri Yükle</h3>
+                  <p id="session-restore-desc" style="margin: 0; font-size: 13px; color: rgba(var(--text-color-rgb, 255,255,255), 0.7); text-align: center; line-height: 1.5;">
+                      Tarayıcı beklenmedik şekilde kapandı veya açık sekmelerle kapatıldı. (X sekme)
+                  </p>
+                  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 5px; width: 100%;">
+                      <button id="session-restore-yes" style="padding: 12px; border-radius: 10px; border: none; background: #0088ff; color: white; font-weight: 600; cursor: pointer; transition: 0.2s;">Oturumu Kurtar</button>
+                      <button id="session-restore-no" style="padding: 10px; border-radius: 10px; border: 1px solid rgba(var(--text-color-rgb, 255,255,255), 0.2); background: transparent; color: var(--text-color, white); font-weight: 500; cursor: pointer; transition: 0.2s;">Yeni Sekme Aç</button>
+                  </div>
+              </div>
+              
+              <button id="prev-tab-btn" class="tab-switch-btn left-switch" title="Önceki Sekme" style="display: none;">&lang;</button>
+              <button id="next-tab-btn" class="tab-switch-btn right-switch" title="Sonraki Sekme" style="display: none;">&rang;</button>
           </div>
-          <div class="dot-pill">
-              <div id="tab-dots-container"></div>
-          </div>
-          <div class="bottom-right">
-              <span id="download-status" class="net-speed" style="display: none; color: #3b82f6;">📥 İndiriliyor...</span>
-              <span id="download-sep" class="dot-sep" style="display: none;">&bull;</span>
-              <span class="net-speed" id="net-speed-display">-- Mbps</span>
+
+          <!-- ALT DURUM ÇUBUĞU (INFO BAR) -->
+          <div class="bottom-bar zone-container" id="zone-bottom">
+              <div class="zone-controls">
+                  <div class="drag-handle" title="Sürüklemek için tut">⠿</div>
+              </div>
+              <div class="bottom-left">
+                  <span class="status-badge glass-badge">Orion v1.0.0</span>
+                  <span class="dot-sep">&bull;</span>
+                  <span id="tracker-count" class="toggleable-status" title="Reklam Engelleyici">🛡️ 0 Engellendi</span>
+                  <span class="dot-sep">&bull;</span>
+                  <span id="vpn-toggle" class="toggleable-status" style="display: none;">🌍 VPN Kapalı</span>
+                  <span id="ram-usage" class="toggleable-status" title="Sistem Bellek Tüketimi">⚡ 0 MB</span>
+              </div>
+              <div class="dot-pill">
+                  <div id="tab-dots-container"></div>
+              </div>
+              <div class="bottom-right">
+                  <span id="download-status" class="net-speed" style="display: none; color: #3b82f6;">📥 İndiriliyor...</span>
+                  <span id="download-sep" class="dot-sep" style="display: none;">&bull;</span>
+                  <span class="net-speed" id="net-speed-display">-- Mbps</span>
+              </div>
           </div>
       </div>
   </div>
