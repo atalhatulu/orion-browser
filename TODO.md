@@ -41,25 +41,25 @@
 - [x] Site izinleri (bildirim, konum, kamera)
 
 ### 5. 🎨 Tema & Görünüm
-- [ ] Koyu/Açık tema
+- [x] Koyu/Açık tema
 - [ ] Duvar kağıdı desteği
 - [ ] Özel tema mağazası veya CSS
 - [ ] Kenar çubuğu
 
 ### 6. 🔧 Performans & Stabilite
-- [ ] Bellek kullanımı göstergesi
+- [x] Bellek kullanımı göstergesi
 - [ ] Donmuş sayfa tespiti
-- [ ] Oturum kurtarma (çökünce sekmeleri geri getir)
+- [x] Oturum kurtarma (çökünce sekmeleri geri getir)
 - [ ] Hata raporlama
 
 ### 7. 💡 Ek Özellikler
-- [ ] Sayfa içi arama (Ctrl+F)
-- [ ] Yakınlaştırma (Ctrl++ / Ctrl+-)
+- [x] Sayfa içi arama (Ctrl+F)
+- [x] Yakınlaştırma (Ctrl++ / Ctrl+-)
 - [ ] PDF görüntüleyici
-- [ ] Gelişmiş sağ tık menüsü
+- [x] Gelişmiş sağ tık menüsü
 - [ ] Sekme grupları
-- [ ] Sekmeyi sabitleme
-- [ ] Ekran görüntüsü alma
+- [x] Sekmeyi sabitleme
+- [x] Ekran görüntüsü alma
 - [ ] Okuma modu
 - [ ] Çeviri
 - [ ] Gece modu
@@ -70,6 +70,15 @@
 - [ ] Service Worker
 - [ ] Progressive Web App (PWA)
 
+### 9. 🚀 Modern Tarayıcı Özellikleri
+- [ ] Şifre Yöneticisi (Otomatik doldurma ve şifre kaydetme)
+- [ ] Profil Desteği (Çoklu kullanıcı ve izole oturumlar)
+- [ ] Bulut Senkronizasyonu (Cihazlar arası geçmiş ve yer imi)
+- [ ] Resim İçinde Resim (Picture-in-Picture / PIP)
+- [ ] Fare Hareketleri (Mouse Gestures - Hızlı navigasyon)
+- [ ] Gelişmiş Reklam Engelleyici Arayüzü (Beyaz liste yönetimi)
+- [ ] Eklenti Desteği (Temel düzey add-on / uzantı API'si)
+
 ## 📝 Notlar
-- Öncelik: 1-3 arası kritik, 4-5 orta, 6-8 ileri seviye
+- Öncelik: 1-3 arası kritik, 4-5 orta, 6-8 ileri seviye, 9 modern standartlar.
 - Her madde için BUGS.md'ye yaz, sırayla çözelim

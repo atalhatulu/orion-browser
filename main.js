@@ -2,7 +2,10 @@ const { app, BrowserWindow, ipcMain, Menu, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-app.disableHardwareAcceleration(); // Linux sistemlerdeki GPU crash (boş siyah ekran) sorununu çözer
+// app.disableHardwareAcceleration(); // Kapatıldı çünkü CSS animasyonlarında aşırı FPS düşüklüğüne yol açıyor.
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
 let win;
 let blockedCount = 0; 
 let adblockEnabled = true;

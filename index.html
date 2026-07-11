@@ -57,6 +57,7 @@
                           <div class="menu-item" data-action="appearance">🎨 Görünüm</div>
                           <div class="menu-item" data-action="find">🔍 Sayfada Bul</div>
                           <div class="menu-divider"></div>
+                          <div class="menu-item" data-action="screenshot">📸 Ekran Görüntüsü Al</div>
                           <div class="menu-item" data-action="print">🖨️ Yazdır</div>
                           <div class="menu-item" data-action="downloads">📥 İndirilenler</div>
                           <div class="menu-item" data-action="history">🕐 Geçmiş</div>
@@ -137,6 +138,15 @@
                       <button id="session-restore-yes" style="padding: 12px; border-radius: 10px; border: none; background: #0088ff; color: white; font-weight: 600; cursor: pointer; transition: 0.2s;">Oturumu Kurtar</button>
                       <button id="session-restore-no" style="padding: 10px; border-radius: 10px; border: 1px solid rgba(var(--text-color-rgb, 255,255,255), 0.2); background: transparent; color: var(--text-color, white); font-weight: 500; cursor: pointer; transition: 0.2s;">Yeni Sekme Aç</button>
                   </div>
+              </div>
+
+              <!-- SAYFA İÇİ ARAMA (CTRL+F) -->
+              <div id="find-box" style="display: none; position: absolute; top: 10px; right: 20px; z-index: 99999; background: var(--bg-color); border: 1px solid rgba(var(--text-color-rgb), 0.2); border-radius: 8px; padding: 5px 10px; align-items: center; gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                  <input type="text" id="find-input" placeholder="Sayfada bul..." style="background: rgba(var(--text-color-rgb), 0.05); color: var(--text-color); border: none; outline: none; padding: 5px; border-radius: 4px; font-size: 12px;">
+                  <span id="find-match-count" style="font-size: 11px; color: rgba(var(--text-color-rgb), 0.5);">0/0</span>
+                  <button id="find-prev" class="icon-btn" style="border:none; background:transparent;">&uarr;</button>
+                  <button id="find-next" class="icon-btn" style="border:none; background:transparent;">&darr;</button>
+                  <button id="find-close" class="icon-btn" style="border:none; background:transparent;">&times;</button>
               </div>
               
               <button id="prev-tab-btn" class="tab-switch-btn left-switch" title="Önceki Sekme" style="display: none;">&lang;</button>

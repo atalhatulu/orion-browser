@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function hexToRgbStr(hex) {
       if(!hex) return '255, 255, 255';
       if(hex.startsWith('#')) hex = hex.slice(1);
+      if(hex.length === 3) hex = hex.split('').map(c => c + c).join('');
       var r = parseInt(hex.substr(0,2),16); if(isNaN(r)) r = 255;
       var g = parseInt(hex.substr(2,2),16); if(isNaN(g)) g = 255;
       var b = parseInt(hex.substr(4,2),16); if(isNaN(b)) b = 255;
@@ -496,6 +497,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
               // Tıklama event'i sadece noktada değil tüm wrapper üzerinde olmalı ki kolay tıklansın
               wrapper.addEventListener('click', () => switchTab(t.id));
+
+              // Sağ tık ile sekme sabitleme (Pin Tab)
+              wrapper.addEventListener('contextmenu', (e) => {
+                  e.preventDefault();
+                  t.isPinned = !t.isPinned;
+                  if (t.isPinned) {
+                      wrapper.classList.add('pinned-tab');
+                      wrapper.style.borderBottom = '2px solid #00a2e8';
+                  } else {
+                      wrapper.classList.remove('pinned-tab');
+                      wrapper.style.borderBottom = 'none';
+                  }
+                  // Pinned olanları başa al
+                  tabs.sort((a, b) => {
+                      if (a.isPinned === b.isPinned) return 0;
+                      return a.isPinned ? -1 : 1;
+                  });
+                  updateDots();
+              });
           }
 
           // Durumları güncelle
@@ -975,8 +995,18 @@ document.addEventListener('DOMContentLoaded', () => {
                   const t = tabs.find(t => t.id === activeTabId);
                   if (t && t.webviewEl) t.webviewEl.print();
               } else if (action === 'find') {
+                  toggleFindBox();
+              } else if (action === 'screenshot') {
                   const t = tabs.find(t => t.id === activeTabId);
-                  if (t && t.webviewEl) t.webviewEl.openDevTools();
+                  if (t && t.webviewEl) {
+                      t.webviewEl.capturePage().then(img => {
+                          const url = img.toDataURL();
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `orion-screenshot-${Date.now()}.png`;
+                          a.click();
+                      }).catch(e => console.error('Screenshot error:', e));
+                  }
               }
           });
       });
@@ -1247,5 +1277,69 @@ document.addEventListener('DOMContentLoaded', () => {
           ramBadge.innerText = `⚡ ${mb} MB`;
       });
   }
+
+  // --- SAYFA İÇİ ARAMA (CTRL+F) VE YAKINLAŞTIRMA (ZOOM) ---
+  const findBox = document.getElementById('find-box');
+  const findInput = document.getElementById('find-input');
+  const findMatchCount = document.getElementById('find-match-count');
+  const findPrev = document.getElementById('find-prev');
+  const findNext = document.getElementById('find-next');
+  const findClose = document.getElementById('find-close');
+
+  function toggleFindBox() {
+      if (!findBox) return;
+      if (findBox.style.display === 'none') {
+          findBox.style.display = 'flex';
+          findInput.focus();
+      } else {
+          findBox.style.display = 'none';
+          const activeTab = tabs.find(t => t.id === activeTabId);
+          if (activeTab && activeTab.webviewEl) activeTab.webviewEl.stopFindInPage('clearSelection');
+      }
+  }
+
+  if (findClose) findClose.addEventListener('click', () => toggleFindBox());
+  
+  if (findInput) {
+      findInput.addEventListener('keyup', (e) => {
+          const activeTab = tabs.find(t => t.id === activeTabId);
+          if (!activeTab || !activeTab.webviewEl) return;
+          if (e.key === 'Enter') {
+              activeTab.webviewEl.findInPage(findInput.value, { forward: true, findNext: true });
+          } else if (findInput.value) {
+              activeTab.webviewEl.findInPage(findInput.value);
+          } else {
+              activeTab.webviewEl.stopFindInPage('clearSelection');
+          }
+      });
+  }
+  if (findNext) findNext.addEventListener('click', () => {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab && activeTab.webviewEl && findInput.value) activeTab.webviewEl.findInPage(findInput.value, { forward: true, findNext: true });
+  });
+  if (findPrev) findPrev.addEventListener('click', () => {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab && activeTab.webviewEl && findInput.value) activeTab.webviewEl.findInPage(findInput.value, { forward: false, findNext: true });
+  });
+
+  window.addEventListener('keydown', (e) => {
+      // Ctrl+F
+      if (e.ctrlKey && e.key.toLowerCase() === 'f') {
+          toggleFindBox();
+      }
+      
+      // Zoom
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab && activeTab.webviewEl) {
+          const wv = activeTab.webviewEl;
+          if (e.ctrlKey && (e.key === '+' || e.key === '=')) {
+              wv.getZoomLevel().then(l => wv.setZoomLevel(l + 0.5));
+          } else if (e.ctrlKey && e.key === '-') {
+              wv.getZoomLevel().then(l => wv.setZoomLevel(l - 0.5));
+          } else if (e.ctrlKey && e.key === '0') {
+              wv.setZoomLevel(0);
+          }
+      }
+  });
 
   }); // DOMContentLoaded
