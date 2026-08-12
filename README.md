@@ -8,12 +8,14 @@ Orion Browser, Chromium ve Electron tabanlı, **Spatial UI** (Uzamsal Arayüz) v
 
 - **🛸 Spatial UI & 3D Sekme Geçişleri:** Geleneksel üst sekme çubuğu yoktur. Sekmeler arasında geçiş yaparken ana ekran küçülerek (scale) üç boyutlu bir kayma efektiyle yeni sekmeye geçer. Tıpkı modern bir işletim sisteminde pencereler arası gezinir gibi!
 - **👁️ Gerçek Zamanlı Sekme Önizlemeleri (Thumbnails):** Alt durum çubuğundaki Apple/Samsung tarzı noktalara fare ile geldiğinizde, o sekmede açık olan sitenin canlı ve anlık bir ekran görüntüsü şık bir baloncuk (tooltip) içinde belirir.
-- **⚡ Canlı Ağ İstatistikleri:** Tarayıcının sağ alt köşesinde anlık internet indirme hızınızı (Mbps) ve bulut sunuculara olan gecikmenizi (Ping/ms) saniye saniye takip edebilirsiniz.
+- **⚡ Canlı İndirme Hızı Göstergesi:** Sağ alt köşede, etkin indirmenin canlı ilerlemesi (%) ve gerçek zamanlı ortalama indirme hızı (KB/s / MB/s) saniye saniye gösterilir.
 - **🎨 Kusursuz Karanlık Tema & Cam Efekti:** Tamamen siyah (Deep Dark) arka plan üzerine inşa edilmiş yarı saydam (blur) menü barları ile modern VIP hissiyatı.
 - **🏠 Dinamik Ana Sayfa:** Tarayıcıyı açtığınızda sizi karşılayan özel tasarımlı, dijital saatli ve Google arama entegrasyonlu büyüleyici bir karşılama ekranı (Homepage).
 - **🛠️ Gelişmiş Bağlam Menüsü (Context Menu):** Görsellerin üzerine sağ tıklandığında resmi yeni sekmede açma veya farklı kaydetme gibi dinamik olarak değişen akıllı sağ tık menüsü.
-- **📥 Entegre İndirme Yöneticisi:** Arka planda çalışan ve alt bilgi barında canlı % ilerlemesini gösteren şık bir indirme takip sistemi.
-- **⌨️ Pratik Kısayollar:** `F11` ile tam ekran moduna geçiş, `Ctrl + W` ile aktif sekmeyi anında kapatma desteği.
+- **📥 Entegre İndirme Yöneticisi:** Arka planda çalışan ve alt bilgi barında canlı % ilerlemesiyle birlikte indirme hızını (KB/s / MB/s) gösteren şık bir indirme takip sistemi.
+- **🛡️ Reklam Engelleyici (Ad Blocker):** Varsayılan olarak aktif olan tracker/reklam domainleri listesi (DoubleClick, Google Analytics, Facebook, Taboola vb.) istekleri engeller; listenin tamamını Ayarlar sayfasından düzenleyebilirsiniz. Engellenen istek sayısı gerçek zamanlı olarak takip edilir.
+- **🕵️ Gizli Sekme (Incognito):** Gizli modda açılan sekmelerde ayrı bir tema ve "Gizli Sekme" rozeti gösterilir.
+- **⌨️ Pratik Kısayollar:** `F11` ile tam ekran moduna geçiş, `Ctrl + W` ile aktif sekmeyi kapatma, `Ctrl + S` ile Zen Modu (üst/alt barları gizleme), `Ctrl + Shift + D` ile Debug modu ve `Ctrl + F` ile sayfa içi arama.
 
 ---
 
@@ -42,11 +44,13 @@ Orion Browser'ı kendi makinenizde çalıştırmak için sisteminizde [Node.js](
 
 ## 📁 Proje Mimarisi
 
-- `main.js`: Electron arka plan işlemleri, pencere yönetimi, IPC iletişimleri ve indirme (download) yöneticisi.
-- `renderer.js`: Tarayıcının ana mantığı, sekme yönetimi (DOM/Webview), ping hesaplamaları ve UI etkileşimleri.
+- `main.js`: Electron arka plan işlemleri, pencere yönetimi, IPC iletişimleri, reklam engelleyici ve indirme (download) yöneticisi.
+- `preload.js`: Güvenli contextBridge ile webview ve renderer arasındaki izole köprü.
+- `renderer.js`: Tarayıcının ana mantığı, sekme yönetimi (DOM/Webview), sekme önizlemeleri, indirme hızı/ilerleme hesapları ve UI etkileşimleri.
 - `index.html`: Orion Browser'ın ana iskeleti, üst ve alt barlar, DOM tabanlı önizleme modülleri.
 - `style.css`: Üç boyutlu geçiş animasyonları, glassmorphism tasarımları ve saydam yerleşim ayarları.
-- `homepage.html`: Yeni sekme açıldığında yüklenen başlangıç sayfası.
+- `homepage.html`: Yeni sekme açıldığında yüklenen başlangıç sayfası (dijital saat ve Google arama).
+- `settings.html`, `history.html`, `downloads.html`, `bookmarks.html`: Sırasıyla ayarlar (tema, reklam engelleyici, izinler), geçmiş, indirilenler ve yer işaretleri pencereleri.
 
 ---
 
